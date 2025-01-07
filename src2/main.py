@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import os
 import dotenv
 import json
@@ -43,30 +42,11 @@ def parse_rss_feed()->bool:
         logging_msg(f"Error in parse_rss_feed(): {e}", "CRITICAL")
         return False
 
-=======
-import dotenv
-import os
-from logs import init_log, logging_msg
-import utils
-
-
-
-##################################################
-##################################################
-##################################################
->>>>>>> 6dece97de3ecd4d262879f3367d6edc4784a8aae
 
 ############
 ### MAIN ###
 ############
-dotenv.load_dotenv(override=True)
 init_log()
 logging_msg("START PROGRAM", "WARNING")
-<<<<<<< HEAD
 parse_rss_feed()
-=======
-if utils.init():
-    FEED_RSS = os.getenv("FEED_RSS")
-    utils.parse_rss_feed(FEED_RSS)
->>>>>>> 6dece97de3ecd4d262879f3367d6edc4784a8aae
 logging_msg("END PROGRAM", "WARNING")
