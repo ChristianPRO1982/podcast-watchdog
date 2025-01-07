@@ -1,12 +1,13 @@
-from logs import init_log, logging_msg
 import dotenv
+import os
+from logs import init_log, logging_msg
+from utils import parse_rss_feed
 
 
 
-### DOWNLOAD PODCASTS ###
-def parse_rss_feed():
-    pass
-
+##################################################
+##################################################
+##################################################
 
 ############
 ### MAIN ###
@@ -14,5 +15,6 @@ def parse_rss_feed():
 dotenv.load_dotenv(override=True)
 init_log()
 logging_msg("START PROGRAM", "WARNING")
-parse_rss_feed()
+FEED_RSS = os.getenv("FEED_RSS")
+parse_rss_feed(FEED_RSS)
 logging_msg("END PROGRAM", "WARNING")
