@@ -23,7 +23,7 @@ def init()->bool:
         CREATE TABLE IF NOT EXISTS podcasts (
             ID INTEGER PRIMARY KEY AUTOINCREMENT,
             title TEXT NOT NULL,
-            link TEXT NOT NULL,
+            link TEXT NOT NULL UNIQUE,
             published TEXT NOT NULL,
             description TEXT NOT NULL
         )""")
@@ -61,13 +61,23 @@ def parse_rss_feed(feed_rss_url: str) -> bool:
             logging_msg(f"{log_prefix} Podcast Link: {link}", 'DEBUG')
             logging_msg(f"{log_prefix} Podcast Published Date: {published}", 'DEBUG')
             logging_msg(f"{log_prefix} Podcast Description: {description}", 'DEBUG')
+            title = title.replace('"', "''")
+            link = link.replace('"', "''")
+            published = published.replace('"', "''")
+            description = description.replace('"', "''")
 
             request = f'''
 INSERT INTO podcasts (title, link, published, description)
      VALUES ("{title}", "{link}", "{published}", "{description}")
 '''
             logging_msg(f"{log_prefix} request: {request}", 'DEBUG')
-            cursor.execute(request)
+            try:
+                cursor.execute(request)
+            except Exception as e:
+                if 'UNIQUE constraint' in str(e):
+                    logging_msg(f"{log_prefix} Podcast already exists", 'WARNING')
+                else:
+                    logging_msg(f"{log_prefix} Error: {e}", 'ERROR')
 
             conn.commit()
 
