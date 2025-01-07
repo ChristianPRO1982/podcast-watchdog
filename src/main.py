@@ -1,4 +1,5 @@
-from src.logs import init_log, logging_msg
+from logs import init_log, logging_msg
+import dotenv
 
 
 
@@ -10,7 +11,8 @@ def parse_rss_feed():
 ############
 ### MAIN ###
 ############
+dotenv.load_dotenv(override=True)
 init_log()
 logging_msg("START PROGRAM", "WARNING")
-test()
+parse_rss_feed()
 logging_msg("END PROGRAM", "WARNING")
