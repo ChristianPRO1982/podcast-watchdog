@@ -5,7 +5,7 @@ Some translations by Deepl.com
 
 ## .ENV format
 
-bash```
+```
 DEBUG=0 # 0: off, 1: on, 2: on with debug messages, 3: on with only SQL queries
 
 RSS_FEEDS=my_json_file.json
@@ -13,7 +13,7 @@ RSS_FEEDS=my_json_file.json
 
 ## json file format
 
-bash```
+```
 [
     {"category": "my_category", "name": "my_name", "rss_feed": "URL"}
 ]
