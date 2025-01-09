@@ -23,6 +23,9 @@ def init()->bool:
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS podcasts (
             ID INTEGER PRIMARY KEY AUTOINCREMENT,
+            category TEXT NOT NULL,
+            podcast_name TEXT NOT NULL,
+            rss_feed TEXT NOT NULL,
             title TEXT NOT NULL,
             link TEXT NOT NULL UNIQUE,
             published TEXT NOT NULL,
@@ -39,12 +42,12 @@ def init()->bool:
         return False
 
 ### DOWNLOAD PODCASTS ###
-def parse_rss_feed(feed_rss_url: str) -> bool:
+def parse_rss_feed(category: str, name: str, rss_feed: str) -> bool:
     log_prefix = '[utils | parse_rss_feed]'
     try:
-        logging_msg(f"{log_prefix} feed_rss_url: {feed_rss_url}", 'DEBUG')
+        logging_msg(f"{log_prefix} feed_rss_url: {rss_feed}", 'DEBUG')
 
-        feed = feedparser.parse(feed_rss_url)
+        feed = feedparser.parse(rss_feed)
 
         if feed.bozo:
             raise Exception(f"Failed to parse RSS feed: {feed.bozo_exception}")
@@ -68,8 +71,8 @@ def parse_rss_feed(feed_rss_url: str) -> bool:
             description = description.replace('"', "''")
 
             request = f'''
-INSERT INTO podcasts (title, link, published, description)
-     VALUES ("{title}", "{link}", "{published}", "{description}")
+INSERT INTO podcasts (category, podcast_name, rss_feed, title, link, published, description)
+     VALUES ("{category}", "{name}", "{rss_feed}", "{title}", "{link}", "{published}", "{description}")
 '''
             logging_msg(f"{log_prefix} request: {request}", 'SQL')
             try:

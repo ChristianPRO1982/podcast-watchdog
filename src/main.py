@@ -23,6 +23,6 @@ if utils.init():
         category = podcast["category"]
         name = podcast["name"]
         rss_feed = podcast["rss_feed"]
-        utils.parse_rss_feed(rss_feed)
+        utils.parse_rss_feed(category, name, rss_feed)
 
 logging_msg("END PROGRAM", "WARNING")
