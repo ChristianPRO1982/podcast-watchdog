@@ -1,5 +1,6 @@
 import feedparser
 import sqlite3
+import json
 from logs import logging_msg
 
 
@@ -70,7 +71,7 @@ def parse_rss_feed(feed_rss_url: str) -> bool:
 INSERT INTO podcasts (title, link, published, description)
      VALUES ("{title}", "{link}", "{published}", "{description}")
 '''
-            logging_msg(f"{log_prefix} request: {request}", 'DEBUG')
+            logging_msg(f"{log_prefix} request: {request}", 'SQL')
             try:
                 cursor.execute(request)
             except Exception as e:
@@ -88,3 +89,22 @@ INSERT INTO podcasts (title, link, published, description)
     except Exception as e:
         logging_msg(f"{log_prefix} Error: {e}", 'ERROR')
         return False
+
+
+##################################################
+##################################################
+##################################################
+
+### PARSE JSON ###
+def parse_json(json_file: str) -> list:
+    log_prefix = '[utils | parse_json]'
+    try:
+        logging_msg(f"{log_prefix} json_file: {json_file}", 'DEBUG')
+
+        with open(json_file, 'r', encoding='utf-8') as file:
+            feeds = json.load(file)
+        return feeds
+    
+    except Exception as e:
+        logging_msg(f"{log_prefix} Error: {e}", 'ERROR')
+        return []
