@@ -1,8 +1,10 @@
 import feedparser
+import requests
+import whisper
+import openai
 import sqlite3
 import json
 import os
-import requests
 from logs import logging_msg
 
 
