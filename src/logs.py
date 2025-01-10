@@ -19,8 +19,11 @@ def init_log()->bool:
             print("Debug mode: ", DEBUG)
             if DEBUG == '1':
                 logging.basicConfig(filename=log_filename, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-            else:
+            elif DEBUG == '2':
                 logging.basicConfig(filename=log_filename, level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+            elif DEBUG == '3':
+                logging.basicConfig(filename=log_filename, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+        
         else:
             logging.basicConfig(filename=log_filename, level=logging.WARNING, format='%(asctime)s - %(levelname)s - %(message)s')
         
@@ -33,6 +36,8 @@ def init_log()->bool:
 
 def logging_msg(msg, type='INFO')->bool:
     try:
+        DEBUG = os.getenv("DEBUG")
+
         logger = logging.getLogger(__name__)
         # print(logging.getLevelName(logger.getEffectiveLevel()))
 
@@ -48,9 +53,14 @@ def logging_msg(msg, type='INFO')->bool:
             logger.warning(msg)
         elif type == 'CRITICAL':
             logger.critical(msg)
+        elif type == 'SQL':
+            if DEBUG == '3':
+                logger.info(msg)
+            else:
+                logger.debug(msg)
 
-        if type != 'DEBUG':
-            print(f"[{type}] {msg} : ")
+        if type != 'DEBUG' and type != 'SQL' or DEBUG == '3' and type == 'SQL':
+            print(f"[{type}] {msg}")
 
         return True
 
