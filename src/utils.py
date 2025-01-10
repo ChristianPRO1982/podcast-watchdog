@@ -157,6 +157,13 @@ UPDATE podcasts
     except Exception as e:
         logging_msg(f"{log_prefix} Error: {e}", 'ERROR')
         return False
+    
+
+##################
+### TRANSCRIBE ###
+##################
+def transcribe(file_path, FFMPEG_PATH):
+    pass
 
 
 ##################################################
