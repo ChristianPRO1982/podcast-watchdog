@@ -1,5 +1,5 @@
 import pytest
-from src.prog import add, multiply, subtract
+from src.prog import add, multiply, subtract, divide
 
 def test_add():
     assert add(2, 3) == 5
@@ -15,3 +15,8 @@ def test_subtract():
     assert subtract(2, 3) == -1
     assert subtract(-1, 1) == -2
     assert subtract(0, 0) == 0
+
+def test_divide():
+    assert divide(2, 3) == 2/3
+    assert divide(-1, 1) == -1
+    assert divide(0, 0) == 0
