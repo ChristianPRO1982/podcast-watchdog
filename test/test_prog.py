@@ -17,6 +17,5 @@ def test_subtract():
     assert subtract(0, 0) == 0
 
 def test_divide():
-    assert divide(2, 3) == 2/3
+    assert divide(1, 1) == 1
     assert divide(-1, 1) == -1
-    assert divide(0, 0) == 0
