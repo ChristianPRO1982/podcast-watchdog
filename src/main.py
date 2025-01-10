@@ -24,5 +24,6 @@ if utils.init():
         name = podcast["name"]
         rss_feed = podcast["rss_feed"]
         utils.parse_rss_feed(category, name, rss_feed)
+        utils.download_podcast()
 
 logging_msg("END PROGRAM", "WARNING")

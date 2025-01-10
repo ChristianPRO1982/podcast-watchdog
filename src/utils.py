@@ -1,6 +1,8 @@
 import feedparser
 import sqlite3
 import json
+import os
+import requests
 from logs import logging_msg
 
 
@@ -15,13 +17,13 @@ from logs import logging_msg
 def init()->bool:
     log_prefix = '[utils | parse_rss_feed]'
     try:
-        # Create a connection to the SQLite database
+        FOLDER_PATH = os.getenv("FOLDER_PATH")
+        os.makedirs(f'./{FOLDER_PATH}/', exist_ok=True)
+
         conn = sqlite3.connect('podcast.db')
 
-        # Create a cursor object to interact with the database
         cursor = conn.cursor()
 
-        # Create the podcasts table if it doesn't exist
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS podcasts (
             ID INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -103,37 +105,50 @@ INSERT INTO podcasts (category, podcast_name, rss_feed, title, link, published, 
 ########################
 ### DOWNLOAD PODCAST ###
 ########################
-def download_podcast(podcast_id: int, podcast_link: str) -> bool:
+def download_podcast() -> bool:
     log_prefix = '[utils | download_podcast]'
     try:
-        logging_msg(f"{log_prefix} podcast_id: {podcast_id}", 'DEBUG')
-        logging_msg(f"{log_prefix} podcast_link: {podcast_link}", 'DEBUG')
-
+        FOLDER_PATH = os.getenv("FOLDER_PATH")
+        PREFIX = os.getenv("PREFIX")
+        
         conn = sqlite3.connect('podcast.db')
         cursor = conn.cursor()
 
-        cursor.execute(f"SELECT * FROM podcasts WHERE ID = {podcast_id}")
-        podcast = cursor.fetchone()
-        if podcast is None:
-            logging_msg(f"{log_prefix} Podcast not found", 'ERROR')
-            return False
+        request = f'''
+SELECT id, link
+  FROM podcasts
+ WHERE downloaded IS FALSE
+'''
+        logging_msg(f"{log_prefix} request: {request}", 'SQL')
+        cursor.execute(request)
 
-        title = podcast[4]
-        link = podcast[5]
-        published = podcast[6]
-        description = podcast[7]
-        downloaded = podcast[8]
-        processed = podcast[9]
+        for row in cursor.fetchall():
+            logging_msg(f"{log_prefix} row: {row}", 'DEBUG')
+            id = row[0]
+            link = row[1]
 
-        if downloaded:
-            logging_msg(f"{log_prefix} Podcast already downloaded", 'WARNING')
-            return False
+            file_name = os.path.join(FOLDER_PATH, f'{PREFIX}{id}.mp3')
 
-        logging_msg(f"----------------------------------------------------------------------------------------------------", 'DEBUG')
-        logging_msg(f"{log_prefix} Podcast Title: {title}", 'DEBUG')
-        logging_msg(f"{log_prefix} Podcast Link: {link}", 'DEBUG')
-        logging_msg(f"{log_prefix} Podcast Published Date: {published}", 'DEBUG')
-        logging_msg(f"{log_prefix} Podcast Description: {description}", 'DEBUG')
+            try:
+                response = requests.get(link)
+                response.raise_for_status()
+                with open(file_name, 'wb') as file:
+                    file.write(response.content)
+                logging_msg(f"{log_prefix} Podcast downloaded: {file_name}")
+
+                request = f'''
+UPDATE podcasts
+   SET downloaded = TRUE
+ WHERE id = {id}
+'''
+                cursor.execute(request)
+                conn.commit()
+                logging_msg(f"{log_prefix} Podcast updated: {id}", 'DEBUG')
+
+            except Exception as e:
+                logging_msg(f"{log_prefix} Error downloading podcast: {e}", 'ERROR')
+        
+        conn.close()
 
         return True
     
