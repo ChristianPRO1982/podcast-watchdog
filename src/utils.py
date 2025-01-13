@@ -170,6 +170,45 @@ def transcribe_all_podcasts(FOLDER_PATH, PREFIX, FFMPEG_PATH):
     log_prefix = '[utils | transcribe_all_podcasts]'
 
     try:
+        conn = sqlite3.connect('podcast.db')
+        cursor = conn.cursor()
+
+        request = f'''
+SELECT id
+  FROM podcasts
+ WHERE downloaded IS TRUE
+   AND processed IS FALSE
+LIMIT 1
+'''
+        logging_msg(f"{log_prefix} request: {request}", 'SQL')
+        cursor.execute(request)
+
+        for row in cursor.fetchall():
+            logging_msg(f"{log_prefix} row: {row}", 'DEBUG')
+            id = row[0]
+
+            file_name = os.path.join(FOLDER_PATH, f'{PREFIX}{id}.mp3')
+
+            try:
+                if not os.path.exists(file_name):
+                    raise Exception(f"File not found: {file_name}")
+                
+                transcribe(file_name, FFMPEG_PATH)
+                logging_msg(f"{log_prefix} Podcast processed: {file_name}", 'DEBUG')
+
+                request = f'''
+UPDATE podcasts
+   SET processed = TRUE
+ WHERE id = {id}
+'''
+                # cursor.execute(request)
+                # conn.commit()
+                # logging_msg(f"{log_prefix} Podcast updated: {id}", 'DEBUG')
+
+            except Exception as e:
+                logging_msg(f"{log_prefix} Error downloading podcast [id:{id}]: {e}", 'ERROR')
+        
+        conn.close()
 
         return True
     
@@ -179,8 +218,20 @@ def transcribe_all_podcasts(FOLDER_PATH, PREFIX, FFMPEG_PATH):
         return False
 
 
-def transcribe(file_path, FFMPEG_PATH):
-    os.environ["PATH"] = FFMPEG_PATH + os.pathsep + os.environ["PATH"]
+def transcribe(file_path, FFMPEG_PATH)->bool:
+    log_prefix = '[utils | transcribe]'
+
+    try:
+        os.environ["PATH"] = FFMPEG_PATH + os.pathsep + os.environ["PATH"]
+        model = whisper.load_model("base")
+        result = model.transcribe(file_path)
+        return True
+    
+
+    except Exception as e:
+        logging_msg(f"{log_prefix} Error: {e}", 'ERROR')
+        return False
+
 
 
 ##################################################
