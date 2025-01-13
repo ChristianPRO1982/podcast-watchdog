@@ -50,6 +50,10 @@ def init()->bool:
         logging_msg(f"{log_prefix} Error: {e}", 'ERROR')
         return False
 
+##################################################
+##################################################
+##################################################
+
 ######################
 ### PARSE PODCASTS ###
 ######################
@@ -204,6 +208,8 @@ UPDATE podcasts
                 # cursor.execute(request)
                 # conn.commit()
                 # logging_msg(f"{log_prefix} Podcast updated: {id}", 'DEBUG')
+                
+                break
 
             except Exception as e:
                 logging_msg(f"{log_prefix} Error downloading podcast [id:{id}]: {e}", 'ERROR')
@@ -222,6 +228,8 @@ def transcribe(file_path, FFMPEG_PATH)->bool:
     log_prefix = '[utils | transcribe]'
 
     try:
+        print(file_path)
+        print(FFMPEG_PATH)
         os.environ["PATH"] = FFMPEG_PATH + os.pathsep + os.environ["PATH"]
         model = whisper.load_model("base")
         result = model.transcribe(file_path)
