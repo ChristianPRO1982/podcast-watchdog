@@ -45,6 +45,7 @@ def init()->bool:
 
         return True
     
+    
     except Exception as e:
         logging_msg(f"{log_prefix} Error: {e}", 'ERROR')
         return False
@@ -89,7 +90,7 @@ INSERT INTO podcasts (category, podcast_name, rss_feed, title, link, published, 
                 cursor.execute(request)
             except Exception as e:
                 if 'UNIQUE constraint' in str(e):
-                    logging_msg(f"{log_prefix} Podcast already exists", 'WARNING')
+                    logging_msg(f"{log_prefix} Podcast already exists", 'DEBUG')
                 else:
                     logging_msg(f"{log_prefix} Error: {e}", 'ERROR')
 
@@ -98,7 +99,8 @@ INSERT INTO podcasts (category, podcast_name, rss_feed, title, link, published, 
         conn.close()
         logging_msg(f"{log_prefix} >> OK <<", 'DEBUG')
         return True
-    
+
+
     except Exception as e:
         logging_msg(f"{log_prefix} Error: {e}", 'ERROR')
         return False
@@ -107,12 +109,9 @@ INSERT INTO podcasts (category, podcast_name, rss_feed, title, link, published, 
 ########################
 ### DOWNLOAD PODCAST ###
 ########################
-def download_podcast() -> bool:
+def download_podcast(FOLDER_PATH, PREFIX) -> bool:
     log_prefix = '[utils | download_podcast]'
     try:
-        FOLDER_PATH = os.getenv("FOLDER_PATH")
-        PREFIX = os.getenv("PREFIX")
-        
         conn = sqlite3.connect('podcast.db')
         cursor = conn.cursor()
 
@@ -136,7 +135,7 @@ SELECT id, link
                 response.raise_for_status()
                 with open(file_name, 'wb') as file:
                     file.write(response.content)
-                logging_msg(f"{log_prefix} Podcast downloaded: {file_name}")
+                logging_msg(f"{log_prefix} Podcast downloaded: {file_name}", 'DEBUG')
 
                 request = f'''
 UPDATE podcasts
@@ -148,22 +147,40 @@ UPDATE podcasts
                 logging_msg(f"{log_prefix} Podcast updated: {id}", 'DEBUG')
 
             except Exception as e:
-                logging_msg(f"{log_prefix} Error downloading podcast: {e}", 'ERROR')
+                logging_msg(f"{log_prefix} Error downloading podcast [id:{id}]: {e}", 'ERROR')
         
         conn.close()
 
         return True
+    
     
     except Exception as e:
         logging_msg(f"{log_prefix} Error: {e}", 'ERROR')
         return False
     
 
+##################################################
+##################################################
+##################################################
+
 ##################
 ### TRANSCRIBE ###
 ##################
+def transcribe_all_podcasts(FOLDER_PATH, PREFIX, FFMPEG_PATH):
+    log_prefix = '[utils | transcribe_all_podcasts]'
+
+    try:
+
+        return True
+    
+    
+    except Exception as e:
+        logging_msg(f"{log_prefix} Error: {e}", 'ERROR')
+        return False
+
+
 def transcribe(file_path, FFMPEG_PATH):
-    pass
+    os.environ["PATH"] = FFMPEG_PATH + os.pathsep + os.environ["PATH"]
 
 
 ##################################################
