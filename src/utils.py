@@ -46,6 +46,7 @@ def init()->bool:
 
         return True
     
+    
     except Exception as e:
         logging_msg(f"{log_prefix} Error: {e}", 'ERROR')
         return False
@@ -104,7 +105,8 @@ INSERT INTO podcasts (category, podcast_name, rss_feed, title, link, published, 
         conn.close()
         logging_msg(f"{log_prefix} >> OK <<", 'DEBUG')
         return True
-    
+
+
     except Exception as e:
         logging_msg(f"{log_prefix} Error: {e}", 'ERROR')
         return False
@@ -113,12 +115,9 @@ INSERT INTO podcasts (category, podcast_name, rss_feed, title, link, published, 
 ########################
 ### DOWNLOAD PODCAST ###
 ########################
-def download_podcast() -> bool:
+def download_podcast(FOLDER_PATH, PREFIX) -> bool:
     log_prefix = '[utils | download_podcast]'
     try:
-        FOLDER_PATH = os.getenv("FOLDER_PATH")
-        PREFIX = os.getenv("PREFIX")
-        
         conn = sqlite3.connect('podcast.db')
         cursor = conn.cursor()
 
@@ -181,6 +180,7 @@ UPDATE podcasts
         conn.close()
 
         return True
+    
     
     except Exception as e:
         logging_msg(f"{log_prefix} Error: {e}", 'ERROR')

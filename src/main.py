@@ -20,7 +20,7 @@ logging_msg("utils.parse_json START", 'WARNING')
 podcast_list = utils.parse_json(os.getenv("RSS_FEEDS"))
 
 if utils.init():
-    for podcast in podcast_list:
+    for podcast in RSS_FEEDS:
         category = podcast["category"]
         name = podcast["name"]
         rss_feed = podcast["rss_feed"]
