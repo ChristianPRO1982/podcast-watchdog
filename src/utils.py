@@ -78,7 +78,7 @@ def parse_rss_feed(category: str, name: str, rss_feed: str) -> bool:
             published = entry.get('published', 'No publish date')
             description = entry.get('description', 'No description')
             logging_msg(f"----------------------------------------------------------------------------------------------------", 'DEBUG')
-            logging_msg(f"{log_prefix} Podcast Title: {title}", 'DEBUG')
+            logging_msg(f"{log_prefix} Podcast Title: {title}")
             logging_msg(f"{log_prefix} Podcast Link: {link}", 'DEBUG')
             logging_msg(f"{log_prefix} Podcast Published Date: {published}", 'DEBUG')
             logging_msg(f"{log_prefix} Podcast Description: {description}", 'DEBUG')
@@ -96,7 +96,7 @@ INSERT INTO podcasts (category, podcast_name, rss_feed, title, link, published, 
                 cursor.execute(request)
             except Exception as e:
                 if 'UNIQUE constraint' in str(e):
-                    logging_msg(f"{log_prefix} Podcast already exists")
+                    logging_msg(f"{log_prefix} Podcast already exists", 'DEBUG')
                 else:
                     logging_msg(f"{log_prefix} Error: {e}", 'ERROR')
 
@@ -122,7 +122,7 @@ def download_podcast(FOLDER_PATH, PREFIX) -> bool:
         cursor = conn.cursor()
 
         request = f'''
-SELECT id, link
+SELECT id, podcast_name, link
   FROM podcasts
  WHERE downloaded = 0
 '''
@@ -130,10 +130,11 @@ SELECT id, link
         cursor.execute(request)
 
         for row in cursor.fetchall():
-            logging_msg(f"{log_prefix} row: {row}", 'DEBUG')
             id = row[0]
-            link = row[1]
+            podcast_name = row[1]
+            link = row[2]
             downloaded = 0
+            logging_msg(f"{log_prefix} id: {row[0]} / podcast_name: {podcast_name}")
 
             try:
                 response = requests.get(link)
@@ -161,7 +162,7 @@ SELECT id, link
                     response.raise_for_status()
                     with open(file_name, 'wb') as file:
                         file.write(response.content)
-                    logging_msg(f"{log_prefix} Podcast downloaded: {file_name}")
+                    logging_msg(f"{log_prefix} Podcast downloaded: {file_name}", 'DEBUG')
                     downloaded = 1
 
                 except Exception as e:
@@ -204,23 +205,24 @@ def transcribe_all_podcasts() -> bool:
         cursor = conn.cursor()
 
         request = f'''
-SELECT id
+SELECT id, podcast_name
   FROM podcasts
- WHERE downloaded IS TRUE
+ WHERE downloaded = 1
    AND processed IS FALSE
 '''
         logging_msg(f"{log_prefix} request: {request}", 'SQL')
         cursor.execute(request)
 
         for row in cursor.fetchall():
+            logging_msg(f"{log_prefix} id: {row[0]} / podcast_name: {row[1]}")
             file_name = os.path.join(FOLDER_PATH, f'{PREFIX}{row[0]}.mp3')
             if os.path.exists(file_name):
                 logging_msg(f"{log_prefix} File exists: {file_name}", 'DEBUG')
                 transcribe_text = transcribe_podcast(file_name)
                 if transcribe_text:
-                    print(transcribe_text)
+                    print('TRUE', transcribe_text)
                 else:
-                    pass
+                    print('FALSE', transcribe_text)
 
             else:
                 logging_msg(f"{log_prefix} File does not exist: {file_name}", 'WARNING')
@@ -239,14 +241,13 @@ SELECT id
 def transcribe_podcast(file_name: str) -> str:
     log_prefix = '[utils | transcribe_podcast]'
     try:
-        print('>>>>', file_name)
         model = whisper.load_model("base")  # "base" / "tiny" / "small" / "medium" / "large"
         result = model.transcribe(str(file_name))
 
-        # transcription = result.get("text", "")
-        # if not transcription:
-        #     print("Erreur : aucune transcription n'a été générée.")
-        #     return
+        transcription = result.get("text", "")
+        if not transcription:
+            logging_msg(f"{log_prefix} Error: {e}", 'WARNING')
+            return
 
         # print(f"Sauvegarde de la transcription dans '{output_txt_path}'...")
         # output_path = Path(output_txt_path)
