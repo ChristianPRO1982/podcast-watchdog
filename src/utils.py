@@ -38,7 +38,7 @@ def init()->bool:
             published TEXT NOT NULL,
             description TEXT NOT NULL,
             downloaded INTEGER DEFAULT 0,
-            processed BOOLEAN DEFAULT FALSE
+            processed INTEGER DEFAULT 0
         )""")
 
         conn.commit()
@@ -208,25 +208,44 @@ def transcribe_all_podcasts() -> bool:
 SELECT id, podcast_name
   FROM podcasts
  WHERE downloaded = 1
-   AND processed IS FALSE
+   AND processed = 0
 '''
         logging_msg(f"{log_prefix} request: {request}", 'SQL')
         cursor.execute(request)
 
         for row in cursor.fetchall():
             logging_msg(f"{log_prefix} id: {row[0]} / podcast_name: {row[1]}")
-            file_name = os.path.join(FOLDER_PATH, f'{PREFIX}{row[0]}.mp3')
-            if os.path.exists(file_name):
-                logging_msg(f"{log_prefix} File exists: {file_name}", 'DEBUG')
-                transcribe_text = transcribe_podcast(file_name)
+            podcast_file_name = os.path.join(FOLDER_PATH, f'{PREFIX}{row[0]}.mp3')
+            text_file_name = os.path.join(FOLDER_PATH, f'{PREFIX}{row[0]}.txt')
+
+            if os.path.exists(podcast_file_name):
+                logging_msg(f"{log_prefix} File exists: {podcast_file_name}", 'DEBUG')
+                
+                transcribe_text = transcribe_podcast(podcast_file_name)
+                
                 if transcribe_text:
-                    print('TRUE', transcribe_text)
+                    with open(text_file_name, 'w', encoding='utf-8') as text_file:
+                        text_file.write(transcribe_text)
+                    logging_msg(f"{log_prefix} Transcription saved: {text_file_name}", 'DEBUG')
+                    processed = 1
                 else:
-                    print('FALSE', transcribe_text)
+                    processed = 2
+
+                os.remove(podcast_file_name)
+                logging_msg(f"{log_prefix} Podcast file removed: {podcast_file_name}", 'DEBUG')
+
+                request = f'''
+UPDATE podcasts
+   SET processed = {processed}
+ WHERE id = {row[0]}
+'''
+                logging_msg(f"{log_prefix} request: {request}", 'SQL')
+                cursor.execute(request)
+                conn.commit()
+                logging_msg(f"{log_prefix} Podcast updated: {row[0]}", 'DEBUG')
 
             else:
-                logging_msg(f"{log_prefix} File does not exist: {file_name}", 'WARNING')
-            break
+                logging_msg(f"{log_prefix} File does not exist: {podcast_file_name}", 'WARNING')
         
         conn.close()
 
@@ -235,9 +254,13 @@ SELECT id, podcast_name
 
     except Exception as e:
         logging_msg(f"{log_prefix} Error: {e}", 'ERROR')
+        conn.close()
         return False
 
 
+###############
+### WHISPER ###
+###############
 def transcribe_podcast(file_name: str) -> str:
     log_prefix = '[utils | transcribe_podcast]'
     try:
@@ -247,15 +270,9 @@ def transcribe_podcast(file_name: str) -> str:
         transcription = result.get("text", "")
         if not transcription:
             logging_msg(f"{log_prefix} Error: {e}", 'WARNING')
-            return
+            return None
 
-        # print(f"Sauvegarde de la transcription dans '{output_txt_path}'...")
-        # output_path = Path(output_txt_path)
-        # output_path.write_text(transcription, encoding="utf-8")
-
-        # print(f"Transcription terminée avec succès. Résultat sauvegardé dans '{output_txt_path}'.")
-
-        return ""
+        return transcription
     
 
     except Exception as e:
