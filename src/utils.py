@@ -2,6 +2,7 @@ import feedparser
 import requests
 import whisper
 import openai
+from bs4 import BeautifulSoup
 import sqlite3
 import json
 import os
@@ -9,9 +10,9 @@ from logs import logging_msg
 
 
 
-##################################################
-##################################################
-##################################################
+####################################################################################################
+####################################################################################################
+####################################################################################################
 
 ############
 ### INIT ###
@@ -36,7 +37,7 @@ def init()->bool:
             link TEXT NOT NULL UNIQUE,
             published TEXT NOT NULL,
             description TEXT NOT NULL,
-            downloaded BOOLEAN DEFAULT FALSE,
+            downloaded INTEGER DEFAULT 0,
             processed BOOLEAN DEFAULT FALSE
         )""")
 
@@ -48,6 +49,11 @@ def init()->bool:
     except Exception as e:
         logging_msg(f"{log_prefix} Error: {e}", 'ERROR')
         return False
+
+
+####################################################################################################
+####################################################################################################
+####################################################################################################
 
 ######################
 ### PARSE PODCASTS ###
@@ -89,7 +95,7 @@ INSERT INTO podcasts (category, podcast_name, rss_feed, title, link, published, 
                 cursor.execute(request)
             except Exception as e:
                 if 'UNIQUE constraint' in str(e):
-                    logging_msg(f"{log_prefix} Podcast already exists", 'WARNING')
+                    logging_msg(f"{log_prefix} Podcast already exists")
                 else:
                     logging_msg(f"{log_prefix} Error: {e}", 'ERROR')
 
@@ -119,7 +125,7 @@ def download_podcast() -> bool:
         request = f'''
 SELECT id, link
   FROM podcasts
- WHERE downloaded IS FALSE
+ WHERE downloaded = 0
 '''
         logging_msg(f"{log_prefix} request: {request}", 'SQL')
         cursor.execute(request)
@@ -128,27 +134,49 @@ SELECT id, link
             logging_msg(f"{log_prefix} row: {row}", 'DEBUG')
             id = row[0]
             link = row[1]
-
-            file_name = os.path.join(FOLDER_PATH, f'{PREFIX}{id}.mp3')
+            downloaded = 0
 
             try:
                 response = requests.get(link)
                 response.raise_for_status()
-                with open(file_name, 'wb') as file:
-                    file.write(response.content)
-                logging_msg(f"{log_prefix} Podcast downloaded: {file_name}")
+                soup = BeautifulSoup(response.content, 'html.parser')
+                mp3_links = [
+                    a['href'] for a in soup.find_all('a', href=True)
+                    if a['href'].endswith('.mp3')
+                ]
+                link = mp3_links[0]
+            
+            except Exception as e:
+                if '404' in str(e):
+                    logging_msg(f"{log_prefix} Podcast link not found: {link}", 'WARNING')
+                    downloaded = 404
+                else:
+                    logging_msg(f"{log_prefix} Error parsing podcast link: {e}", 'ERROR')
+                    downloaded = 3
 
-                request = f'''
+
+            if downloaded == 0:
+                try:
+                    file_name = os.path.join(FOLDER_PATH, f'{PREFIX}{id}.mp3')
+                    response = requests.get(link)
+                    response.raise_for_status()
+                    with open(file_name, 'wb') as file:
+                        file.write(response.content)
+                    logging_msg(f"{log_prefix} Podcast downloaded: {file_name}")
+                    downloaded = 1
+
+                except Exception as e:
+                    logging_msg(f"{log_prefix} Error downloading podcast: {e}", 'ERROR')
+                    downloaded = 2
+
+            request = f'''
 UPDATE podcasts
-   SET downloaded = TRUE
+   SET downloaded = {downloaded}
  WHERE id = {id}
 '''
-                cursor.execute(request)
-                conn.commit()
-                logging_msg(f"{log_prefix} Podcast updated: {id}", 'DEBUG')
-
-            except Exception as e:
-                logging_msg(f"{log_prefix} Error downloading podcast: {e}", 'ERROR')
+            cursor.execute(request)
+            conn.commit()
+            logging_msg(f"{log_prefix} Podcast updated: {id}", 'DEBUG')
         
         conn.close()
 
@@ -159,16 +187,84 @@ UPDATE podcasts
         return False
     
 
+####################################################################################################
+####################################################################################################
+####################################################################################################
+
 ##################
 ### TRANSCRIBE ###
 ##################
-def transcribe(file_path, FFMPEG_PATH):
-    pass
+def transcribe_all_podcasts() -> bool:
+    log_prefix = '[utils | transcribe_all_podcasts]'
+    try:
+        FOLDER_PATH = os.getenv("FOLDER_PATH")
+        PREFIX = os.getenv("PREFIX")
+        
+        conn = sqlite3.connect('podcast.db')
+        cursor = conn.cursor()
+
+        request = f'''
+SELECT id
+  FROM podcasts
+ WHERE downloaded IS TRUE
+   AND processed IS FALSE
+'''
+        logging_msg(f"{log_prefix} request: {request}", 'SQL')
+        cursor.execute(request)
+
+        for row in cursor.fetchall():
+            file_name = os.path.join(FOLDER_PATH, f'{PREFIX}{row[0]}.mp3')
+            if os.path.exists(file_name):
+                logging_msg(f"{log_prefix} File exists: {file_name}", 'DEBUG')
+                transcribe_text = transcribe_podcast(file_name)
+                if transcribe_text:
+                    print(transcribe_text)
+                else:
+                    pass
+
+            else:
+                logging_msg(f"{log_prefix} File does not exist: {file_name}", 'WARNING')
+            break
+        
+        conn.close()
+
+        return True
+    
+
+    except Exception as e:
+        logging_msg(f"{log_prefix} Error: {e}", 'ERROR')
+        return False
 
 
-##################################################
-##################################################
-##################################################
+def transcribe_podcast(file_name: str) -> str:
+    log_prefix = '[utils | transcribe_podcast]'
+    try:
+        model = whisper.load_model("base")  # "base" / "tiny" / "small" / "medium" / "large"
+        print(file_name)
+        result = model.transcribe(str(file_name))
+
+        # transcription = result.get("text", "")
+        # if not transcription:
+        #     print("Erreur : aucune transcription n'a été générée.")
+        #     return
+
+        # print(f"Sauvegarde de la transcription dans '{output_txt_path}'...")
+        # output_path = Path(output_txt_path)
+        # output_path.write_text(transcription, encoding="utf-8")
+
+        # print(f"Transcription terminée avec succès. Résultat sauvegardé dans '{output_txt_path}'.")
+
+        return ""
+    
+
+    except Exception as e:
+        logging_msg(f"{log_prefix} Error: {e}", 'ERROR')
+        return None
+
+
+####################################################################################################
+####################################################################################################
+####################################################################################################
 
 ### PARSE JSON ###
 def parse_json(json_file: str) -> list:
