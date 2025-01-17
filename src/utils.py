@@ -239,8 +239,8 @@ SELECT id
 def transcribe_podcast(file_name: str) -> str:
     log_prefix = '[utils | transcribe_podcast]'
     try:
+        print('>>>>', file_name)
         model = whisper.load_model("base")  # "base" / "tiny" / "small" / "medium" / "large"
-        print(file_name)
         result = model.transcribe(str(file_name))
 
         # transcription = result.get("text", "")

@@ -17,7 +17,9 @@ init_log()
 logging_msg("START PROGRAM", "WARNING")
 
 logging_msg("utils.parse_json START", 'WARNING')
-podcast_list = utils.parse_json(os.getenv("RSS_FEEDS"))
+RSS_FEEDS = utils.parse_json(os.getenv("RSS_FEEDS"))
+FOLDER_PATH = os.getenv("FOLDER_PATH")
+PREFIX = os.getenv("PREFIX")
 
 if utils.init():
     for podcast in RSS_FEEDS:
@@ -28,7 +30,7 @@ if utils.init():
         stop_and_go = utils.parse_rss_feed(category, name, rss_feed)
         if stop_and_go:
             logging_msg("utils.download_podcast START", 'WARNING')
-            utils.download_podcast()
+            utils.download_podcast(FOLDER_PATH, PREFIX)
     
     logging_msg("utils.transcribe_all_podcasts START", 'WARNING')
     stop_and_go = utils.transcribe_all_podcasts()
