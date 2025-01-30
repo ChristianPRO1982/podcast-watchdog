@@ -26,7 +26,7 @@ if utils.init():
         category = podcast["category"]
         name = podcast["name"]
         rss_feed = podcast["rss_feed"]
-        logging_msg(f"utils.parse_rss_feed {name} START", 'WARNING')
+        logging_msg(f"utils.parse_rss_feed {name} START")
         stop_and_go = utils.parse_rss_feed(category, name, rss_feed)
         if stop_and_go:
             logging_msg("utils.download_podcast START", 'WARNING')

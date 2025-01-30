@@ -78,7 +78,7 @@ def parse_rss_feed(category: str, name: str, rss_feed: str) -> bool:
             published = entry.get('published', 'No publish date')
             description = entry.get('description', 'No description')
             logging_msg(f"----------------------------------------------------------------------------------------------------", 'DEBUG')
-            logging_msg(f"{log_prefix} Podcast Title: {title}")
+            logging_msg(f"{log_prefix} Podcast Title: {title}", 'DEBUG')
             logging_msg(f"{log_prefix} Podcast Link: {link}", 'DEBUG')
             logging_msg(f"{log_prefix} Podcast Published Date: {published}", 'DEBUG')
             logging_msg(f"{log_prefix} Podcast Description: {description}", 'DEBUG')
