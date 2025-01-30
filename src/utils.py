@@ -74,7 +74,14 @@ def parse_rss_feed(category: str, name: str, rss_feed: str) -> bool:
         
         for entry in feed.entries:
             title = entry.get('title', 'No title')
-            link = entry.get('link', 'No link')
+            if '222feeds.acast.com' in rss_feed:
+                links = entry.get('links', [])
+                # link = links[1]['href'] if len(links) > 1 else 'No link'
+                link = next((l['href'] for l in links if l['href'].startswith('https://sphinx.acast.com')), 'No link')
+                logging_msg(f"{log_prefix} 'feeds.acast.com' Podcast Link: {link}", 'DEBUG')
+            else:
+                link = entry.get('link', 'No link')
+                logging_msg(f"{log_prefix} OTHER Podcast Link: {link}", 'DEBUG')
             published = entry.get('published', 'No publish date')
             description = entry.get('description', 'No description')
             logging_msg(f"----------------------------------------------------------------------------------------------------", 'DEBUG')
@@ -140,10 +147,18 @@ SELECT id, podcast_name, link
                 response = requests.get(link)
                 response.raise_for_status()
                 soup = BeautifulSoup(response.content, 'html.parser')
-                mp3_links = [
-                    a['href'] for a in soup.find_all('a', href=True)
-                    if a['href'].endswith('.mp3')
-                ]
+                
+                if link.startswith('https://shows.acast.com'):
+                    mp3_links = [
+                        a['content'] for a in soup.find_all('meta', content=True)
+                        if a['content'].endswith('.mp3')
+                    ]
+                else:
+                    mp3_links = [
+                        a['href'] for a in soup.find_all('a', href=True)
+                        if a['href'].endswith('.mp3')
+                    ]
+
                 link = mp3_links[0]
             
             except Exception as e:
