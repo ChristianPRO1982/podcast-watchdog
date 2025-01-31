@@ -74,14 +74,17 @@ def parse_rss_feed(category: str, name: str, rss_feed: str) -> bool:
         
         for entry in feed.entries:
             title = entry.get('title', 'No title')
-            if '222feeds.acast.com' in rss_feed:
+            if 'feeds.acast.com' in rss_feed:
                 links = entry.get('links', [])
                 # link = links[1]['href'] if len(links) > 1 else 'No link'
                 link = next((l['href'] for l in links if l['href'].startswith('https://sphinx.acast.com')), 'No link')
                 logging_msg(f"{log_prefix} 'feeds.acast.com' Podcast Link: {link}", 'DEBUG')
-            else:
+            elif 'feed.ausha.co' in rss_feed:
                 link = entry.get('link', 'No link')
-                logging_msg(f"{log_prefix} OTHER Podcast Link: {link}", 'DEBUG')
+                logging_msg(f"{log_prefix} 'feed.ausha.co' Podcast Link: {link}", 'DEBUG')
+            else:
+                link = entry.get('', 'No link')
+                logging_msg(f"{log_prefix} OTHER Podcast Link: {link}", 'WARNING')
             published = entry.get('published', 'No publish date')
             description = entry.get('description', 'No description')
             logging_msg(f"----------------------------------------------------------------------------------------------------", 'DEBUG')
@@ -153,11 +156,16 @@ SELECT id, podcast_name, link
                         a['content'] for a in soup.find_all('meta', content=True)
                         if a['content'].endswith('.mp3')
                     ]
-                else:
+                elif link.startswith('https://feed.ausha.co'):
                     mp3_links = [
                         a['href'] for a in soup.find_all('a', href=True)
                         if a['href'].endswith('.mp3')
                     ]
+                elif link.startswith('https://sphinx.acast.com/p/open/s'):
+                    mp3_links = [link]
+                else:
+                    logging_msg(f"{log_prefix} link: {link}", 'WARNING')
+                    mp3_links = []
 
                 link = mp3_links[0]
             
@@ -169,7 +177,7 @@ SELECT id, podcast_name, link
                     logging_msg(f"{log_prefix} Error parsing podcast link: {e}", 'ERROR')
                     downloaded = 3
 
-
+            
             if downloaded == 0:
                 try:
                     file_name = os.path.join(FOLDER_PATH, f'{PREFIX}{id}.mp3')

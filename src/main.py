@@ -33,9 +33,9 @@ if utils.init():
             utils.download_podcast(FOLDER_PATH, PREFIX)
     
     logging_msg("utils.transcribe_all_podcasts START", 'WARNING')
-    stop_and_go = utils.transcribe_all_podcasts()
-    if stop_and_go:
-        logging_msg("utils.summarize START", 'WARNING')
+    # stop_and_go = utils.transcribe_all_podcasts()
+    # if stop_and_go:
+    #     logging_msg("utils.summarize START", 'WARNING')
         # utils.summarize()
 
 logging_msg("END PROGRAM", "WARNING")
