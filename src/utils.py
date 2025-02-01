@@ -161,7 +161,7 @@ SELECT id, podcast_name, link
                         a['href'] for a in soup.find_all('a', href=True)
                         if a['href'].endswith('.mp3')
                     ]
-                elif link.startswith('https://sphinx.acast.com/p/open/s'):
+                elif link.startswith('https://sphinx.acast.com/'):
                     mp3_links = [link]
                 else:
                     logging_msg(f"{log_prefix} link: {link}", 'WARNING')
@@ -250,12 +250,13 @@ SELECT id, podcast_name
                     with open(text_file_name, 'w', encoding='utf-8') as text_file:
                         text_file.write(transcribe_text)
                     logging_msg(f"{log_prefix} Transcription saved: {text_file_name}", 'DEBUG')
+                    os.remove(podcast_file_name)
+                    logging_msg(f"{log_prefix} Podcast file removed: {podcast_file_name}", 'DEBUG')
                     processed = 1
                 else:
+                    logging_msg(f"{log_prefix} Error transcribing podcast, Podcast file not removed.", 'ERROR')
                     processed = 2
 
-                os.remove(podcast_file_name)
-                logging_msg(f"{log_prefix} Podcast file removed: {podcast_file_name}", 'DEBUG')
 
                 request = f'''
 UPDATE podcasts
