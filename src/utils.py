@@ -152,21 +152,26 @@ SELECT id, podcast_name, link
                 soup = BeautifulSoup(response.content, 'html.parser')
                 
                 if link.startswith('https://shows.acast.com'):
+                    logging_msg(f"{log_prefix} link.startswith('https://shows.acast.com')", 'DEBUG')
                     mp3_links = [
                         a['content'] for a in soup.find_all('meta', content=True)
                         if a['content'].endswith('.mp3')
                     ]
-                elif link.startswith('https://feed.ausha.co'):
+                elif link.startswith('https://feed.ausha.co') or link.startswith('https://podcast.ausha.co'):
+                    logging_msg(f"{log_prefix} link.startswith('https://feed.ausha.co')", 'DEBUG')
                     mp3_links = [
                         a['href'] for a in soup.find_all('a', href=True)
                         if a['href'].endswith('.mp3')
                     ]
                 elif link.startswith('https://sphinx.acast.com/'):
+                    logging_msg(f"{log_prefix} link.startswith('https://sphinx.acast.com/')", 'DEBUG')
                     mp3_links = [link]
                 else:
-                    logging_msg(f"{log_prefix} link: {link}", 'WARNING')
+                    logging_msg(f"{log_prefix} link.startswith: else", 'DEBUG')
+                    logging_msg(f"{log_prefix} can't to parse the link: {link}", 'WARNING')
                     mp3_links = []
-
+                
+                logging_msg("a", mp3_links)
                 link = mp3_links[0]
             
             except Exception as e:
