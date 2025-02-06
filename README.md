@@ -7,6 +7,7 @@ Some translations by Deepl.com
 
 ```dotenv
 DEBUG=0 # 0: off, 1: on, 2: on with debug messages, 3: on with only SQL queries
+LOG_RETENTION_DAYS=30
 
 RSS_FEEDS=my_json_file.json
 
