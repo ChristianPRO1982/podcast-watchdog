@@ -76,12 +76,14 @@ def parse_rss_feed(category: str, name: str, rss_feed: str) -> bool:
             title = entry.get('title', 'No title')
             if 'feeds.acast.com' in rss_feed:
                 links = entry.get('links', [])
-                # link = links[1]['href'] if len(links) > 1 else 'No link'
                 link = next((l['href'] for l in links if l['href'].startswith('https://sphinx.acast.com')), 'No link')
                 logging_msg(f"{log_prefix} 'feeds.acast.com' Podcast Link: {link}", 'DEBUG')
             elif 'feed.ausha.co' in rss_feed:
                 link = entry.get('link', 'No link')
                 logging_msg(f"{log_prefix} 'feed.ausha.co' Podcast Link: {link}", 'DEBUG')
+            elif 'anchor.fm' in rss_feed:
+                link = next((enclosure['url'] for enclosure in entry.get('enclosures', []) if enclosure['url'].startswith('https://')), 'No link')
+                logging_msg(f"{log_prefix} 'anchor.fm' Podcast Link: {link}", 'DEBUG')
             else:
                 link = entry.get('', 'No link')
                 logging_msg(f"{log_prefix} OTHER Podcast Link: {link}", 'WARNING')
@@ -165,6 +167,9 @@ SELECT id, podcast_name, link
                     ]
                 elif link.startswith('https://sphinx.acast.com/'):
                     logging_msg(f"{log_prefix} link.startswith('https://sphinx.acast.com/')", 'DEBUG')
+                    mp3_links = [link]
+                elif link.startswith('https://anchor.fm/'):
+                    logging_msg(f"{log_prefix} link.startswith('https://anchor.fm/')", 'DEBUG')
                     mp3_links = [link]
                 else:
                     logging_msg(f"{log_prefix} link.startswith: else", 'DEBUG')
