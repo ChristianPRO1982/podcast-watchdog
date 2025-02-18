@@ -1,7 +1,5 @@
 import feedparser
 import requests
-import whisper
-import openai
 from bs4 import BeautifulSoup
 import sqlite3
 import json
