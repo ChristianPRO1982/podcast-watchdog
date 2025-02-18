@@ -4,7 +4,7 @@ import os
 
 
 class Logger:
-    def __init__(self, log_filename):
+    def __init__(self):
         self.status = None # status == None > all right, status != None > error
         self.DEBUG = os.getenv("DEBUG")
         self.LOGS_PATH = os.getenv("LOGS_PATH")
