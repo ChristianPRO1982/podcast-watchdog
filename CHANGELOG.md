@@ -1,3 +1,11 @@
+## [1.0.2](https://github.com/ChristianPRO1982/watch-podcast-download/compare/v1.0.1...v1.0.2) (2025-02-19)
+
+
+### Bug Fixes
+
+* add downloading mp3 ([8cc98b2](https://github.com/ChristianPRO1982/watch-podcast-download/commit/8cc98b23cdca0822c6512123e9a08713c51588d0))
+* downloading OK ([5094a3e](https://github.com/ChristianPRO1982/watch-podcast-download/commit/5094a3e4e356e38996e3f8c74f09a62cdefd45ef))
+
 ## [1.0.1](https://github.com/ChristianPRO1982/watch-podcast-download/compare/v1.0.0...v1.0.1) (2025-02-19)
 
 
