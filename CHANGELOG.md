@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/ChristianPRO1982/watch-podcast-download/compare/v1.0.0...v1.0.1) (2025-02-19)
+
+
+### Bug Fixes
+
+* parse podcast OK ([d6e745a](https://github.com/ChristianPRO1982/watch-podcast-download/commit/d6e745ab399013db104249792b04a21181e3326e))
+
 # 1.0.0 (2025-02-19)
 
 
