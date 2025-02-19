@@ -40,6 +40,12 @@ jobs:
         source venv/bin/activate
         pytest --maxfail=1 --disable-warnings -q
 
+    - name: Remove podcast_pytest.db file
+      run: |
+        if [ -f podcast_pytest.db ]; then
+          rm podcast_pytest.db
+        fi
+
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:

@@ -1,4 +1,5 @@
 import sqlite3
+import os
 from src.utils_podcast import Podcast
 
 
@@ -7,7 +8,12 @@ class PodcastDB:
         self.status = None # status == None > all right, status != None > error
         self.logs = logs
 
-        self.conn = sqlite3.connect('podcast.db')
+        self.DEBUG = os.getenv("DEBUG")
+
+        if self.DEBUG == '4': # debug mode for pytest
+            self.conn = sqlite3.connect('podcast_pytest.db')
+        else:
+            self.conn = sqlite3.connect('podcast.db')
         self.cursor = self.conn.cursor()
         self.init()
 

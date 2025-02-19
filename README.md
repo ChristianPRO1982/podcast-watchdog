@@ -6,7 +6,7 @@ Some translations by Deepl.com
 ## .ENV format
 
 ```dotenv
-DEBUG=0 # 0: off, 1: on, 2: on with debug messages, 3: on with only SQL queries
+DEBUG=4 # 0: off, 1: on, 2: on with debug messages, 3: on with only SQL queries, 4: for pytest
 LOG_RETENTION_DAYS=30
 LOGS_PATH='./logs/'
 

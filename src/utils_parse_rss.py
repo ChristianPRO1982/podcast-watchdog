@@ -12,6 +12,8 @@ class ParseRSS:
         self.DEBUG = os.getenv("DEBUG")
         if self.DEBUG == '0':
             self.RSS_FEEDS = os.getenv("RSS_FEEDS")
+        elif self.DEBUG == '4': # debug mode for pytest
+            self.RSS_FEEDS = 'no.json'
         else:
             self.RSS_FEEDS = os.getenv("RSS_FEEDS_TEST")
 
