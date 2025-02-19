@@ -22,6 +22,9 @@ if __name__ == "__main__":
         podcasts = Podcasts(logs, podcastdb)
         podcasts.download_podcasts()
 
+        logs.logging_msg("transcribe podcasts")
+        podcasts.transcribe_podcasts()
+
         logs.logging_msg("logout from podcastdb")
         podcastdb.logout()
 

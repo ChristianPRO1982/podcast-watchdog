@@ -1,4 +1,5 @@
 import sqlite3
+from utils_podcast import Podcast
 
 
 class PodcastDB:
@@ -83,18 +84,20 @@ SELECT *
 
             podcasts = []
             for row in self.cursor.fetchall():
-                podcast = {
-                    "id": row[0],
-                    "category": row[1],
-                    "name": row[2],
-                    "rss_feed": row[3],
-                    "title": row[4],
-                    "link": row[5],
-                    "published": row[6],
-                    "description": row[7],
-                    "downloaded": row[8],
-                    "processed": row[9]
-                }
+                podcast = Podcast(
+                    self.logs,
+                    self,
+                    row[0],
+                    row[1],
+                    row[2],
+                    row[3],
+                    row[4],
+                    row[5],
+                    row[6],
+                    row[7],
+                    row[8],
+                    row[9]
+                )
                 podcasts.append(podcast)
             
             return podcasts

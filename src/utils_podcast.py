@@ -9,45 +9,78 @@ class Podcasts():
         self.logs = logs
         self.podcastdb = podcastdb
 
+        self.FOLDER_PATH = os.getenv("FOLDER_PATH")
+        self.PREFIX = os.getenv("PREFIX")
+
         self.podcasts = []
-        self.list_podcast()
 
 
     def __str__(self):
         return self.__class__.__name__
     
 
-    def list_podcast(self):
-        prefix = f'[{self.__class__.__name__} | list_podcast]'
-
-        try:
-            for podcast in self.podcastdb.podcasts(downloaded=False):
-                self.logs.logging_msg(f"{prefix} podcast: [{podcast['id']}] {podcast['name']}", 'DEBUG')
-                self.podcasts.append(Podcast(
-                    self.logs,
-                    self.podcastdb,
-                    podcast['id'],
-                    podcast['category'],
-                    podcast['name'],
-                    podcast['rss_feed'],
-                    podcast['title'],
-                    podcast['link'],
-                    podcast['published'],
-                    podcast['description'],
-                    podcast['downloaded'],
-                    podcast['processed']
-                ))
-
-        except Exception as e:
-            self.logs.logging_msg(f"{prefix} Error: {e}", 'WARNING')
-    
-
     def download_podcasts(self):
         prefix = f'[{self.__class__.__name__} | download_podcasts]'
 
         try:
+            self.podcasts.clear()
+            self.podcasts = self.podcastdb.podcasts(downloaded=False)
+
             for podcast in self.podcasts:
                 podcast.download_podcast()
+                podcast.update_podcast()
+
+        except Exception as e:
+            self.logs.logging_msg(f"{prefix} Error: {e}", 'WARNING')
+
+
+    def transcribe_podcasts(self):
+        prefix = f'[{self.__class__.__name__} | transcribe_podcasts]'
+
+        try:
+            self.podcasts.clear()
+            self.podcasts = self.podcastdb.podcasts(downloaded=True, processed=False)
+
+            for podcast in self.podcasts:
+                podcast_file_name = os.path.abspath(f'./{self.FOLDER_PATH}/{self.PREFIX}{podcast.id}.mp3')
+                text_file_name    = os.path.abspath(f'./{self.FOLDER_PATH}/{self.PREFIX}{podcast.id}.txt')
+                self.logs.logging_msg(f"{prefix} podcast_file_name: {podcast_file_name}", 'DEBUG')
+                self.logs.logging_msg(f"{prefix} text_file_name: {text_file_name}", 'DEBUG')
+
+                ###############
+                ### WHISPER ###
+                ###############
+                try:
+                    response = requests.post('http://127.0.0.1:9000/transcribe/', params={'file_path': podcast_file_name})
+                    response_data = response.json()
+
+                    if response.status_code == 200:
+                        podcast.processed = 1
+                        self.logs.logging_msg(f"{prefix} [API status:{response.status_code}] Transcription successful for podcast: [{podcast.id}] {podcast.title}", 'DEBUG')
+                    else:
+                        podcast.processed = 2
+                        self.logs.logging_msg(f"{prefix} [API status:{response.status_code}] Transcription failed for podcast: [{podcast.id}] {podcast.title} with error: {response_data.get('error', 'Unknown error')}", 'ERROR')
+                
+                except Exception as e:
+                    podcast.processed = 3
+                    self.logs.logging_msg(f"{prefix} Error: {e}", 'ERROR')
+
+                ############################
+                ### REPLACE .MP3 BY .TXT ###
+                ############################
+                if podcast.processed == 1:
+                    try:
+                        with open(text_file_name, 'w', encoding='utf-8') as text_file:
+                            text_file.write(response_data.get('transcription_text', ''))
+                        self.logs.logging_msg(f"{prefix} Transcription saved: {text_file_name}", 'DEBUG')
+
+                        os.remove(podcast_file_name)
+                        self.logs.logging_msg(f"{prefix} Podcast file removed: {podcast_file_name}", 'DEBUG')
+
+                    except Exception as e:
+                        podcast.processed = 4
+                        self.logs.logging_msg(f"{prefix} Error: {e}", 'ERROR')
+                        
                 podcast.update_podcast()
 
         except Exception as e:
