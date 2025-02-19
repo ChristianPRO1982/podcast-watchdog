@@ -49,10 +49,11 @@ class PodcastDB:
         try:
             request = f'''
 INSERT INTO podcasts (category, podcast_name, rss_feed, title, link, published, description)
-    VALUES ("{category}", "{podcast_name}", "{rss_feed}", "{title}", "{link}", "{published}", "{description}")
+     VALUES ("{category}", "{podcast_name}", "{rss_feed}", "{title}", "{link}", "{published}", "{description}")
 '''
             self.logs.logging_msg(f"{prefix} request: {request}", 'SQL')
             self.cursor.execute(request)
+            self.conn.commit()
 
             self.logs.logging_msg(f"{prefix} podcast saved in 'podcast.db'", 'DEBUG')
 
@@ -107,6 +108,35 @@ SELECT *
         except Exception as e:
             self.logs.logging_msg(f"{prefix} Error: {e}", 'WARNING')
             return []
+
+
+    def count_podcasts(self, downloaded: bool = None, processed: bool = None)->int:
+        prefix = f'[{self.__class__.__name__} | count_podcasts]'
+
+        if downloaded is True:  downloaded_txt = '   AND downloaded = 1'
+        if downloaded is False: downloaded_txt = '   AND downloaded = 0'
+        if downloaded is None:  downloaded_txt = ''
+        if processed is True:   processed_txt = '   AND processed = 1'
+        if processed is False:  processed_txt = '   AND processed = 0'
+        if processed is None:   processed_txt = ''
+        
+        try:
+            request = '''
+SELECT COUNT(1)
+  FROM podcasts
+ WHERE 1 = 1
+{downloaded_txt}
+{processed_txt}
+'''
+            self.logs.logging_msg(f"{prefix} request: {request}", 'SQL')
+            self.cursor.execute(request)
+            count = self.cursor.fetchone()[0]
+            self.logs.logging_msg(f"{prefix} count: {count}", 'DEBUG')
+            return count
+
+        except Exception as e:
+            self.logs.logging_msg(f"{prefix} Error: {e}", 'ERROR')
+            return 0
         
 
     def update_podcast(self, request: str):

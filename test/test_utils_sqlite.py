@@ -18,3 +18,13 @@ def test_status():
     
     else:
         assert False
+
+def test_add_podcast():
+    if DEBUG == '4':
+        count_before = podcastdb.count_podcasts()
+        podcastdb.insert_podcast('category', 'podcast_name', 'rss_feed', 'title', 'link', 'published', 'description')
+        count_after = podcastdb.count_podcasts()
+        assert count_before + 1 == count_after
+    
+    else:
+        assert False
