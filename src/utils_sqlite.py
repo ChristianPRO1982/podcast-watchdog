@@ -40,7 +40,23 @@ class PodcastDB:
 
 
     def insert_podcast(self, category, podcast_name, rss_feed, title, link, published, description):
-        log_prefix = f'[{self.__class__.__name__} | insert_podcast]'
+        prefix = f'[{self.__class__.__name__} | insert_podcast]'
+        
+        try:
+            request = f'''
+INSERT INTO podcasts (category, podcast_name, rss_feed, title, link, published, description)
+    VALUES ("{category}", "{podcast_name}", "{rss_feed}", "{title}", "{link}", "{published}", "{description}")
+'''
+            self.logs.logging_msg(f"{prefix} request: {request}", 'SQL')
+            self.cursor.execute(request)
+
+            self.logs.logging_msg(f"{prefix} podcast saved in 'podcast.db'", 'DEBUG')
+
+        except Exception as e:
+            if 'UNIQUE constraint' in str(e):
+                self.logs.logging_msg(f"{prefix} Podcast already exists", 'DEBUG')
+            else:
+                self.logs.logging_msg(f"{prefix} Error: {e}", 'WARNING')
 
 
     def logout(self):

@@ -89,7 +89,7 @@ class Logs:
                 logger.critical(msg)
             elif type == 'SQL':
                 if self.DEBUG == '3':
-                    logger.debug(msg)
+                    logger.info(msg)
 
             if self.DEBUG > '0':
                 print(f"[{type}] {msg}")
