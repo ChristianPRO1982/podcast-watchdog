@@ -12,10 +12,6 @@ class Logs:
         self.create_file()
         if not self.status: self.basicConfig()
         if not self.status: self.cleanup_log()
-        
-
-    def __str__(self):
-        return self.__class__.__name__
 
 
     def create_file(self):

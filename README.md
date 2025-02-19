@@ -24,3 +24,24 @@ OPENAI_API_KEY='key'
     {"category": "my_category", "name": "my_name", "rss_feed": "URL"}
 ]
 ```
+
+## launchers
+
+### API
+
+```bash
+uvicorn app.main:app --reload --port 9000
+PYTHONPATH=$(pwd) pytest
+```
+
+### app
+
+```bash
+PYTHONPATH=$(pwd) python3 src/main.py
+```
+
+### Pytest
+
+```bash
+PYTHONPATH=$(pwd) pytest
+```

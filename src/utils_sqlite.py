@@ -1,5 +1,5 @@
 import sqlite3
-from utils_podcast import Podcast
+from src.utils_podcast import Podcast
 
 
 class PodcastDB:
@@ -10,10 +10,6 @@ class PodcastDB:
         self.conn = sqlite3.connect('podcast.db')
         self.cursor = self.conn.cursor()
         self.init()
-    
-
-    def __str__(self):
-        return self.__class__.__name__
 
 
     def init(self):

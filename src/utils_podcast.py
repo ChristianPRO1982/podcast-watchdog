@@ -13,10 +13,6 @@ class Podcasts():
         self.PREFIX = os.getenv("PREFIX")
 
         self.podcasts = []
-
-
-    def __str__(self):
-        return self.__class__.__name__
     
 
     def download_podcasts(self):
@@ -108,10 +104,6 @@ class Podcast():
         self.PREFIX = os.getenv("PREFIX")
 
         os.makedirs(f'./{self.FOLDER_PATH}/', exist_ok=True)
-
-
-    def __str__(self):
-        return self.__class__.__name__
     
 
     def update_podcast(self):

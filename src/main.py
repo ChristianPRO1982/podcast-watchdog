@@ -1,14 +1,14 @@
 import dotenv
-from logs import Logs
-from utils_sqlite import PodcastDB
-from utils_parse_rss import ParseRSS
-from utils_podcast import Podcasts
+from src.logs import Logs
+from src.utils_sqlite import PodcastDB
+from src.utils_parse_rss import ParseRSS
+from src.utils_podcast import Podcasts
 
 
 dotenv.load_dotenv(override=True)
 
 
-if __name__ == "__main__":
+def main()->bool:
     logs = Logs()
     podcastdb = PodcastDB(logs)
 
@@ -30,7 +30,13 @@ if __name__ == "__main__":
 
         logs.logging_msg("END PROGRAM", "WARNING")
 
+        return True
+
     else:
         print("logger.status:", logs.status)
         print("podcastdb.status:", podcastdb.status)
-        exit(1)
+        return False
+
+
+if __name__ == "__main__":
+    main()

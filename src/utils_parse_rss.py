@@ -9,23 +9,24 @@ class ParseRSS:
         self.logs = logs
         self.podcastdb = podcastdb
 
+        self.DEBUG = os.getenv("DEBUG")
+        if self.DEBUG == '0':
+            self.RSS_FEEDS = os.getenv("RSS_FEEDS")
+        else:
+            self.RSS_FEEDS = os.getenv("RSS_FEEDS_TEST")
+
         self.podcasts = []
         self.feeds = self.parse_json()
         self.parse_feeds()
-    
-
-    def __str__(self):
-        return self.__class__.__name__
     
 
     def parse_json(self):
         prefix = f'[{self.__class__.__name__} | parse_json]'
 
         try:
-            RSS_FEEDS = os.getenv("RSS_FEEDS")
-            self.logs.logging_msg(f"{prefix} json_file: {RSS_FEEDS}", 'DEBUG')
+            self.logs.logging_msg(f"{prefix} json_file: {self.RSS_FEEDS}", 'DEBUG')
 
-            with open(RSS_FEEDS, 'r', encoding='utf-8') as file:
+            with open(self.RSS_FEEDS, 'r', encoding='utf-8') as file:
                 feeds = json.load(file)
             return feeds
         
@@ -61,10 +62,6 @@ class ParsePodcast:
         self.name = name
         self.rss_feed = rss_feed
         self.parse_podcast()
-    
-
-    def __str__(self):
-        return self.__class__.__name__
 
 
     def parse_podcast(self):
