@@ -3,18 +3,19 @@ import logging
 import os
 
 
-class Logger:
+class Logs:
     def __init__(self):
         self.status = None # status == None > all right, status != None > error
         self.DEBUG = os.getenv("DEBUG")
         self.LOGS_PATH = os.getenv("LOGS_PATH")
         
+        self.create_file()
         if not self.status: self.basicConfig()
         if not self.status: self.cleanup_log()
         
 
     def __str__(self):
-        return self.status
+        return self.__class__.__name__
 
 
     def create_file(self):
