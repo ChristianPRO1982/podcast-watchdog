@@ -88,7 +88,7 @@ class Podcast():
             request = f'''
 UPDATE podcasts
    SET category = "{self.category}",
-       name = "{self.name}",
+       podcast_name = "{self.name}",
        rss_feed = "{self.rss_feed}",
        title = "{self.title}",
        link = "{self.link}",
