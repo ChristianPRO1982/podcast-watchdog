@@ -1,6 +1,4 @@
 import feedparser
-import requests
-from bs4 import BeautifulSoup
 import json
 import os
 
@@ -10,6 +8,7 @@ class ParseRSS:
     def __init__(self, logs, podcastdb):
         self.logs = logs
         self.podcastdb = podcastdb
+
         self.podcasts = []
         self.feeds = self.parse_json()
         self.parse_feeds()
@@ -40,7 +39,7 @@ class ParseRSS:
 
         try:
             for podcast in self.feeds:
-                self.podcasts.append(Podcast(
+                self.podcasts.append(ParsePodcast(
                     self.logs,
                     self.podcastdb,
                     podcast["category"],
@@ -53,10 +52,11 @@ class ParseRSS:
     
 
 ######################################################################################################################################################
-class Podcast:
+class ParsePodcast:
     def __init__(self, logs, podcastdb, category, name, rss_feed):
         self.logs = logs
         self.podcastdb = podcastdb
+        
         self.category = category
         self.name = name
         self.rss_feed = rss_feed
@@ -108,7 +108,7 @@ class Podcast:
                 self.logs.logging_msg(f"{prefix} Podcast Published Date: {published}", 'DEBUG')
                 self.logs.logging_msg(f"{prefix} Podcast Description: {description}", 'DEBUG')
                 self.logs.logging_msg(f"----------------------------------------------------------------------------------------------------", 'DEBUG')
-                
+
                 title = title.replace('"', "''")
                 link = link.replace('"', "''")
                 published = published.replace('"', "''")
@@ -116,10 +116,8 @@ class Podcast:
 
                 self.podcastdb.insert_podcast(self.category, self.name, self.rss_feed, title, link, published, description)
 
-                
-
             self.logs.logging_msg(f"{prefix} >> OK <<", 'DEBUG')
 
 
         except Exception as e:
-            self.logs.logging_msg(f"{prefix} Error: {e}", 'ERROR')
+            self.logs.logging_msg(f"{prefix} Error: {e}", 'WARNING')

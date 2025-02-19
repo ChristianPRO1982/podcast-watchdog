@@ -5,6 +5,7 @@ class PodcastDB:
     def __init__(self, logs):
         self.status = None # status == None > all right, status != None > error
         self.logs = logs
+
         self.conn = sqlite3.connect('podcast.db')
         self.cursor = self.conn.cursor()
         self.init()
@@ -57,6 +58,63 @@ INSERT INTO podcasts (category, podcast_name, rss_feed, title, link, published, 
                 self.logs.logging_msg(f"{prefix} Podcast already exists", 'DEBUG')
             else:
                 self.logs.logging_msg(f"{prefix} Error: {e}", 'WARNING')
+    
+
+    def podcasts(self, downloaded: bool = None, processed: bool = None)->list:
+        prefix = f'[{self.__class__.__name__} | podcasts]'
+
+        if downloaded is True:  downloaded_txt = '   AND downloaded = 1'
+        if downloaded is False: downloaded_txt = '   AND downloaded = 0'
+        if downloaded is None:  downloaded_txt = ''
+        if processed is True:   processed_txt = '   AND processed = 1'
+        if processed is False:  processed_txt = '   AND processed = 0'
+        if processed is None:   processed_txt = ''
+
+        try:
+            request = f'''
+SELECT *
+  FROM podcasts
+ WHERE 1 = 1
+{downloaded_txt}
+{processed_txt}
+'''
+            self.logs.logging_msg(f"{prefix} request: {request}", 'SQL')
+            self.cursor.execute(request)
+
+            podcasts = []
+            for row in self.cursor.fetchall():
+                podcast = {
+                    "id": row[0],
+                    "category": row[1],
+                    "name": row[2],
+                    "rss_feed": row[3],
+                    "title": row[4],
+                    "link": row[5],
+                    "published": row[6],
+                    "description": row[7],
+                    "downloaded": row[8],
+                    "processed": row[9]
+                }
+                podcasts.append(podcast)
+            
+            return podcasts
+
+        except Exception as e:
+            self.logs.logging_msg(f"{prefix} Error: {e}", 'WARNING')
+            return []
+        
+
+    def update_podcast(self, request: str):
+        prefix = f'[{self.__class__.__name__} | update_podcast]'
+        
+        try:
+            self.logs.logging_msg(f"{prefix} request: {request}", 'SQL')
+            self.cursor.execute(request)
+            self.conn.commit()
+            self.logs.logging_msg(f"{prefix} podcast updated in 'podcast.db'", 'DEBUG')
+
+        except Exception as e:
+            self.logs.logging_msg(f"{prefix} Error: {e}", 'ERROR')
 
 
     def logout(self):
