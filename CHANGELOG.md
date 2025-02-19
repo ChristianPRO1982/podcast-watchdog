@@ -1,3 +1,10 @@
+## [1.0.3](https://github.com/ChristianPRO1982/watch-podcast-download/compare/v1.0.2...v1.0.3) (2025-02-19)
+
+
+### Bug Fixes
+
+* add whisper ([d9fd361](https://github.com/ChristianPRO1982/watch-podcast-download/commit/d9fd361ba3f4d81be3d4d55b58d28e109d38610d))
+
 ## [1.0.2](https://github.com/ChristianPRO1982/watch-podcast-download/compare/v1.0.1...v1.0.2) (2025-02-19)
 
 
