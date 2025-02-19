@@ -3,3 +3,4 @@ feedparser
 setuptools
 requests
 bs4
+pytest
