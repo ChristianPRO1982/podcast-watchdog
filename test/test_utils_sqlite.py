@@ -5,6 +5,10 @@ from src.logs import Logs
 from src.utils_sqlite import PodcastDB
 
 
+db_path = './podcast_pytest.db'
+if os.path.exists(db_path):
+    os.remove(db_path)
+
 dotenv.load_dotenv(override=True)
 DEBUG = os.getenv("DEBUG")
 logs = Logs()

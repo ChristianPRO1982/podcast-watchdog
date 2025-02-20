@@ -121,7 +121,7 @@ SELECT *
         if processed is None:   processed_txt = ''
         
         try:
-            request = '''
+            request = f'''
 SELECT COUNT(1)
   FROM podcasts
  WHERE 1 = 1
