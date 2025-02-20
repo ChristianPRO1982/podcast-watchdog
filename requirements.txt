@@ -4,3 +4,4 @@ setuptools
 requests
 bs4
 pytest
+openai==0.28

@@ -42,9 +42,29 @@ UPDATE podcasts
 '''
         podcastdb.update_podcast(request)
 
-        count_before = podcastdb.count_podcasts(downloaded=True, processed=False)
+        count_before = podcastdb.count_podcasts(downloaded=True, transcribed=False)
         podcasts.transcribe_podcasts()
-        count_after = podcastdb.count_podcasts(downloaded=True, processed=False)
+        count_after = podcastdb.count_podcasts(downloaded=True, transcribed=False)
+        assert count_before - 1 == count_after
+    
+    else:
+        assert False
+
+
+def test_summarize():
+    if DEBUG == '4':
+        podcastdb.insert_podcast('category', 'test_summarize', 'rss_feed', 'title', 'test_summarize', 'published', 'description')
+        request = '''
+UPDATE podcasts
+   SET downloaded = 1,
+       transcribed = 1
+ WHERE podcast_name = "test_summarize"
+'''
+        podcastdb.update_podcast(request)
+
+        count_before = podcastdb.count_podcasts(downloaded=True, transcribed=True, summarized=False)
+        podcasts.summarize_podcasts()
+        count_after = podcastdb.count_podcasts(downloaded=True, transcribed=True, summarized=False)
         assert count_before - 1 == count_after
     
     else:

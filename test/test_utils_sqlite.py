@@ -43,7 +43,9 @@ UPDATE podcasts
        published = "published 1",
        description = "description 1",
        downloaded = 1,
-       processed = 1
+       transcribed = 1,
+       summarized = 1,
+       summary = "summary 1"
  WHERE podcast_name = "test_update_podcast"
 '''
         request2 = '''

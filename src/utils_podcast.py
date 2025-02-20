@@ -1,6 +1,8 @@
+import openai
 import requests
 from bs4 import BeautifulSoup
 import os
+import json
 
 
 ######################################################################################################################################################
@@ -9,8 +11,23 @@ class Podcasts():
         self.logs = logs
         self.podcastdb = podcastdb
 
+        self.DEBUG = os.getenv("DEBUG")
         self.FOLDER_PATH = os.getenv("FOLDER_PATH")
         self.PREFIX = os.getenv("PREFIX")
+        self.OPENAI_PROMPTS = os.getenv("OPENAI_PROMPTS")
+        if self.DEBUG == '0':
+            self.OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+        else:
+            self.OPENAI_API_KEY = ""
+
+        try:
+            with open(self.OPENAI_PROMPTS, 'r', encoding='utf-8') as file:
+                self.openai_prompts = json.load(file)
+                self.logs.logging_msg(f"OpenAI prompts loaded", 'DEBUG')
+
+        except Exception as e:
+            self.logs.logging_msg(f"Error loading OpenAI prompts: {e}", 'ERROR')
+            self.openai_prompts = {}
 
         self.podcasts = []
     
@@ -38,7 +55,7 @@ class Podcasts():
 
         try:
             self.podcasts.clear()
-            self.podcasts = self.podcastdb.podcasts(downloaded=True, processed=False)
+            self.podcasts = self.podcastdb.podcasts(downloaded=True, transcribed=False)
 
             for podcast in self.podcasts:
                 podcast_file_name = os.path.abspath(f'./{self.FOLDER_PATH}/{self.PREFIX}{podcast.id}.mp3')
@@ -54,20 +71,20 @@ class Podcasts():
                     response_data = response.json()
 
                     if response.status_code == 200:
-                        podcast.processed = 1
+                        podcast.transcribed = 1
                         self.logs.logging_msg(f"{prefix} [API status:{response.status_code}] Transcription successful for podcast: [{podcast.id}] {podcast.title}", 'DEBUG')
                     else:
-                        podcast.processed = 2
+                        podcast.transcribed = 2
                         self.logs.logging_msg(f"{prefix} [API status:{response.status_code}] Transcription failed for podcast: [{podcast.id}] {podcast.title} with error: {response_data.get('error', 'Unknown error')}", 'ERROR')
                 
                 except Exception as e:
-                    podcast.processed = 3
+                    podcast.transcribed = 3
                     self.logs.logging_msg(f"{prefix} Error: {e}", 'ERROR')
 
                 ############################
                 ### REPLACE .MP3 BY .TXT ###
                 ############################
-                if podcast.processed == 1:
+                if podcast.transcribed == 1:
                     try:
                         with open(text_file_name, 'w', encoding='utf-8') as text_file:
                             text_file.write(response_data.get('transcription_text', ''))
@@ -77,7 +94,7 @@ class Podcasts():
                         self.logs.logging_msg(f"{prefix} Podcast file removed: {podcast_file_name}", 'DEBUG')
 
                     except Exception as e:
-                        podcast.processed = 4
+                        podcast.transcribed = 4
                         self.logs.logging_msg(f"{prefix} Error: {e}", 'ERROR')
                         
                 podcast.update_podcast()
@@ -86,30 +103,60 @@ class Podcasts():
             self.logs.logging_msg(f"{prefix} Error: {e}", 'WARNING')
 
 
-    def summarize_meeting(transcription: str, role: str, pre_prompt: str, DEBUG_CR: str) -> str:
-        if DEBUG_CR != '0':
-            return "mode DEBUG : summarize_meeting()"
-        
-        # Création du prompt avec la transcription
-        prompt = pre_prompt + "\n\nTranscription:\n" + transcription
-        
-        # Appeler l'API de ChatGPT pour générer un CR
-        response = openai.ChatCompletion.create(
-            # model="gpt-4",
-            model="gpt-4o",
-            messages=[
-                {"role": "system", "content": role},
-                {"role": "user", "content": prompt}
-            ]
-        )
-        
-        # Retourner le texte généré par ChatGPT
-        return response['choices'][0]['message']['content']
+    def summarize_podcasts(self)->bool:
+        prefix = f'[{self.__class__.__name__} | summarize_podcasts]'
+
+        try:
+            openai.api_key = self.OPENAI_API_KEY
+
+            self.podcasts.clear()
+            self.podcasts = self.podcastdb.podcasts(downloaded=True, transcribed=True, summarized=False)
+
+            for podcast in self.podcasts:
+                try:
+                    text_file_name    = os.path.abspath(f'./{self.FOLDER_PATH}/{self.PREFIX}{podcast.id}.txt')
+                    
+                    podcasts_prompt = self.openai_prompts['podcasts']
+                    for podcast_prompt in podcasts_prompt:
+                        if podcast_prompt['category'] == podcast.category:
+                            role = podcast_prompt['role']
+                            pre_prompt = podcast_prompt['pre_prompt']
+                            break
+                    
+                    prompt = pre_prompt + "\n\nTranscription:\n" + open(text_file_name, 'r', encoding='utf-8').read()
+
+                    ##################
+                    ### OPENAI API ###
+                    ##################
+                    response = openai.ChatCompletion.create(
+                        # model="gpt-4",
+                        model="gpt-4o",
+                        messages=[
+                            {"role": "system", "content": role},
+                            {"role": "user", "content": prompt}
+                        ]
+                    )
+                    
+                    podcast.summarized = 1
+                    podcast.summary = response['choices'][0]['message']['content']
+                    self.logs.logging_msg(f"{prefix} Summarization successful for podcast: [{podcast.id}] {podcast.title}", 'DEBUG')
+
+                except Exception as e:
+                    podcast.summarized = 2
+                    self.logs.logging_msg(f"{prefix} Error: {e}", 'ERROR')
+                
+                podcast.update_podcast()
+
+            return True
+
+        except Exception as e:
+            self.logs.logging_msg(f"{prefix} Error: {e}", 'WARNING')
+            return False
 
 
 ######################################################################################################################################################
 class Podcast():
-    def __init__(self, logs, podcastdb, id, category, name, rss_feed, title, link, published, description, downloaded, processed):
+    def __init__(self, logs, podcastdb, id, category, name, rss_feed, title, link, published, description, downloaded, transcribed, summarized, summary=None):
         self.logs = logs
         self.podcastdb = podcastdb
 
@@ -122,7 +169,9 @@ class Podcast():
         self.published = published
         self.description = description
         self.downloaded = downloaded
-        self.processed = processed
+        self.transcribed = transcribed
+        self.summarized = summarized
+        self.summary = summary
 
         self.FOLDER_PATH = os.getenv("FOLDER_PATH")
         self.PREFIX = os.getenv("PREFIX")
@@ -144,7 +193,9 @@ UPDATE podcasts
        published = "{self.published}",
        description = "{self.description}",
        downloaded = {self.downloaded},
-       processed = {self.processed}
+       transcribed = {self.transcribed},
+       summarized = {self.summarized},
+       summary = "{self.summary}"
  WHERE id = {self.id}
 '''
             self.podcastdb.update_podcast(request)

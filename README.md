@@ -10,19 +10,35 @@ DEBUG=4 # 0: off, 1: on, 2: on with debug messages, 3: on with only SQL queries,
 LOG_RETENTION_DAYS=30
 LOGS_PATH='./logs/'
 
-RSS_FEEDS='my_json_file.json'
+RSS_FEEDS='my_file_rss_feeds.json'
 FOLDER_PATH='podcasts'
 PREFIX='podcast_'
 
+OPENAI_PROMPTS='my_file_rss_prompts.json'
 OPENAI_API_KEY='key'
 ```
 
-## json file format
+## json file format for podcasts
 
 ```json
 [
     {"category": "my_category", "name": "my_name", "rss_feed": "URL"}
 ]
+```
+
+## json file format for OpenAI prompts
+
+```json
+{
+    "podcasts": [
+        {
+            "category": "IA",
+            "role": "OpenAI role: system, content",
+            "prompt": "OpenAI role: user, content"
+        },
+        ...
+    ]
+}
 ```
 
 ## launchers

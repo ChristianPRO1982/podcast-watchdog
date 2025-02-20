@@ -33,7 +33,9 @@ class PodcastDB:
                 published TEXT NOT NULL,
                 description TEXT NOT NULL,
                 downloaded INTEGER DEFAULT 0,
-                processed INTEGER DEFAULT 0
+                transcribed INTEGER DEFAULT 0,
+                summarized INTEGER DEFAULT 0,
+                summary TEXT DEFAULT NULL
             )""")
 
             self.logs.logging_msg(f"{log_prefix} CREATE TABLE `podcasts`", 'DEBUG')
@@ -64,15 +66,18 @@ INSERT INTO podcasts (category, podcast_name, rss_feed, title, link, published, 
                 self.logs.logging_msg(f"{prefix} Error: {e}", 'WARNING')
     
 
-    def podcasts(self, downloaded: bool = None, processed: bool = None)->list:
+    def podcasts(self, downloaded: bool = None, transcribed: bool = None, summarized: bool = None)->list:
         prefix = f'[{self.__class__.__name__} | podcasts]'
 
         if downloaded is True:  downloaded_txt = '   AND downloaded = 1'
         if downloaded is False: downloaded_txt = '   AND downloaded = 0'
         if downloaded is None:  downloaded_txt = ''
-        if processed is True:   processed_txt = '   AND processed = 1'
-        if processed is False:  processed_txt = '   AND processed = 0'
-        if processed is None:   processed_txt = ''
+        if transcribed is True:   transcribed_txt = '   AND transcribed = 1'
+        if transcribed is False:  transcribed_txt = '   AND transcribed = 0'
+        if transcribed is None:   transcribed_txt = ''
+        if summarized is True:   summarized_txt = '   AND summarized = 1'
+        if summarized is False:  summarized_txt = '   AND summarized = 0'
+        if summarized is None:   summarized_txt = ''
 
         try:
             request = f'''
@@ -80,7 +85,8 @@ SELECT *
   FROM podcasts
  WHERE 1 = 1
 {downloaded_txt}
-{processed_txt}
+{transcribed_txt}
+{summarized_txt}
 '''
             self.logs.logging_msg(f"{prefix} request: {request}", 'SQL')
             self.cursor.execute(request)
@@ -99,7 +105,9 @@ SELECT *
                     row[6],
                     row[7],
                     row[8],
-                    row[9]
+                    row[9],
+                    row[10],
+                    row[11]
                 )
                 podcasts.append(podcast)
             
@@ -110,15 +118,18 @@ SELECT *
             return []
 
 
-    def count_podcasts(self, downloaded: bool = None, processed: bool = None)->int:
+    def count_podcasts(self, downloaded: bool = None, transcribed: bool = None, summarized: bool = None)->int:
         prefix = f'[{self.__class__.__name__} | count_podcasts]'
 
         if downloaded is True:  downloaded_txt = '   AND downloaded = 1'
         if downloaded is False: downloaded_txt = '   AND downloaded = 0'
         if downloaded is None:  downloaded_txt = ''
-        if processed is True:   processed_txt = '   AND processed = 1'
-        if processed is False:  processed_txt = '   AND processed = 0'
-        if processed is None:   processed_txt = ''
+        if transcribed is True:   transcribed_txt = '   AND transcribed = 1'
+        if transcribed is False:  transcribed_txt = '   AND transcribed = 0'
+        if transcribed is None:   transcribed_txt = ''
+        if summarized is True:   summarized_txt = '   AND summarized = 1'
+        if summarized is False:  summarized_txt = '   AND summarized = 0'
+        if summarized is None:   summarized_txt = ''
         
         try:
             request = f'''
@@ -126,7 +137,8 @@ SELECT COUNT(1)
   FROM podcasts
  WHERE 1 = 1
 {downloaded_txt}
-{processed_txt}
+{transcribed_txt}
+{summarized_txt}
 '''
             self.logs.logging_msg(f"{prefix} request: {request}", 'SQL')
             self.cursor.execute(request)
