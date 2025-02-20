@@ -1,3 +1,26 @@
+# [1.1.0](https://github.com/ChristianPRO1982/watch-podcast-download/compare/v1.0.3...v1.1.0) (2025-02-20)
+
+
+### Bug Fixes
+
+* add DEBUG=4 in yml for pytest ([148be52](https://github.com/ChristianPRO1982/watch-podcast-download/commit/148be5274e6cf7f2b3e683942b8398100316f46b))
+* add format for COUNT() request ([1fcae70](https://github.com/ChristianPRO1982/watch-podcast-download/commit/1fcae707f608823f4150659f0f0c328bb4146940))
+* add LOGS_PATH for pytest ([6eacb2b](https://github.com/ChristianPRO1982/watch-podcast-download/commit/6eacb2b258636b095091b5136cbf905d03c314d0))
+* avoids the use of logs during testing ([d6ef249](https://github.com/ChristianPRO1982/watch-podcast-download/commit/d6ef2494d423d65d0315bb49b392533e360e1201))
+* delete podcast_pytest.db ([8f5a256](https://github.com/ChristianPRO1982/watch-podcast-download/commit/8f5a256af227feeaa1bb373456209224973be8d1))
+* problem for count ([87b2a8a](https://github.com/ChristianPRO1982/watch-podcast-download/commit/87b2a8a1f2ff364333611a95f392e796fe8d59e1))
+* prune ([f2166bf](https://github.com/ChristianPRO1982/watch-podcast-download/commit/f2166bfeafdd3a8c663ca959d05b54493ef757e2))
+
+
+### Features
+
+* add pytest ([1523411](https://github.com/ChristianPRO1982/watch-podcast-download/commit/1523411449a1d9856a36c32f2df59cc75b877b9c))
+* add pytest ([a0ec51e](https://github.com/ChristianPRO1982/watch-podcast-download/commit/a0ec51e78bf41e506ab4d308d23e8183098466d6))
+* pytest : test_utils_parse_rss.py ([432f86d](https://github.com/ChristianPRO1982/watch-podcast-download/commit/432f86d1d8d1930df881bdf7917ed9236cbc2c15))
+* pytest : test_utils_podcast.py ([315992b](https://github.com/ChristianPRO1982/watch-podcast-download/commit/315992b3ab7ac94d18889cffe17b641a42968b1c))
+* pytest : test_utils_sqlite.py ([e7ec453](https://github.com/ChristianPRO1982/watch-podcast-download/commit/e7ec4531c6848864a280a7177337b4dc0a2fdfe1))
+* pytest transcribe ([e9209c6](https://github.com/ChristianPRO1982/watch-podcast-download/commit/e9209c61c102c361118a1d6d37eeffc03636a293))
+
 ## [1.0.3](https://github.com/ChristianPRO1982/watch-podcast-download/compare/v1.0.2...v1.0.3) (2025-02-19)
 
 
