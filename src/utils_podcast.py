@@ -86,6 +86,27 @@ class Podcasts():
             self.logs.logging_msg(f"{prefix} Error: {e}", 'WARNING')
 
 
+    def summarize_meeting(transcription: str, role: str, pre_prompt: str, DEBUG_CR: str) -> str:
+        if DEBUG_CR != '0':
+            return "mode DEBUG : summarize_meeting()"
+        
+        # Création du prompt avec la transcription
+        prompt = pre_prompt + "\n\nTranscription:\n" + transcription
+        
+        # Appeler l'API de ChatGPT pour générer un CR
+        response = openai.ChatCompletion.create(
+            # model="gpt-4",
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": role},
+                {"role": "user", "content": prompt}
+            ]
+        )
+        
+        # Retourner le texte généré par ChatGPT
+        return response['choices'][0]['message']['content']
+
+
 ######################################################################################################################################################
 class Podcast():
     def __init__(self, logs, podcastdb, id, category, name, rss_feed, title, link, published, description, downloaded, processed):

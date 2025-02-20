@@ -31,7 +31,6 @@ OPENAI_API_KEY='key'
 
 ```bash
 uvicorn app.main:app --reload --port 9000
-PYTHONPATH=$(pwd) pytest
 ```
 
 ### app
