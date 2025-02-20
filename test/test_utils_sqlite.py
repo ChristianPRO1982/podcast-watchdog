@@ -32,3 +32,32 @@ def test_add_podcast():
     
     else:
         assert False
+
+def test_update_podcast():
+    if DEBUG == '4':
+        request1 = '''
+UPDATE podcasts
+   SET category = "category 1",
+       podcast_name = "podcast_name 1",
+       rss_feed = "rss_feed 1",
+       title = "title 1",
+       link = "link 1",
+       published = "published 1",
+       description = "description 1",
+       downloaded = 1,
+       processed = 1
+ WHERE ID = 1
+'''
+        request2 = '''
+UPDATE podcasts_not_exists
+   SET category = "category 2"
+ WHERE ID = 2
+'''
+        return1 = podcastdb.update_podcast(request1)
+        return2 = podcastdb.update_podcast(request2)
+        
+        assert return1 == True
+        assert return2 == False
+    
+    else:
+        assert False

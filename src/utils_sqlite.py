@@ -139,7 +139,7 @@ SELECT COUNT(1)
             return 0
         
 
-    def update_podcast(self, request: str):
+    def update_podcast(self, request: str)->bool:
         prefix = f'[{self.__class__.__name__} | update_podcast]'
         
         try:
@@ -148,8 +148,11 @@ SELECT COUNT(1)
             self.conn.commit()
             self.logs.logging_msg(f"{prefix} podcast updated in 'podcast.db'", 'DEBUG')
 
+            return True
+
         except Exception as e:
             self.logs.logging_msg(f"{prefix} Error: {e}", 'ERROR')
+            return False
 
 
     def logout(self):
