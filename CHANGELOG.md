@@ -1,3 +1,15 @@
+# [1.2.0](https://github.com/ChristianPRO1982/watch-podcast-download/compare/v1.1.0...v1.2.0) (2025-02-20)
+
+
+### Bug Fixes
+
+* readme: delete pytest command for API ([64a24a1](https://github.com/ChristianPRO1982/watch-podcast-download/commit/64a24a12521da0cf5a6f85eeb5641c078f6b49f4))
+
+
+### Features
+
+* summarize by OpenAI API ([36ede8e](https://github.com/ChristianPRO1982/watch-podcast-download/commit/36ede8e2eea1b7183dfb3dae286fff3126db512a))
+
 # [1.1.0](https://github.com/ChristianPRO1982/watch-podcast-download/compare/v1.0.3...v1.1.0) (2025-02-20)
 
 
