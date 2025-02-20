@@ -5,10 +5,6 @@ from src.logs import Logs
 from src.utils_sqlite import PodcastDB
 
 
-db_path = './podcast_pytest.db'
-if os.path.exists(db_path):
-    os.remove(db_path)
-
 dotenv.load_dotenv(override=True)
 DEBUG = os.getenv("DEBUG")
 logs = Logs()
@@ -26,7 +22,7 @@ def test_status():
 def test_add_podcast():
     if DEBUG == '4':
         count_before = podcastdb.count_podcasts()
-        podcastdb.insert_podcast('category', 'podcast_name', 'rss_feed', 'title', 'link', 'published', 'description')
+        podcastdb.insert_podcast('category', 'test_add_podcast', 'rss_feed', 'title', 'test_add_podcast', 'published', 'description')
         count_after = podcastdb.count_podcasts()
         assert count_before + 1 == count_after
     
@@ -35,18 +31,20 @@ def test_add_podcast():
 
 def test_update_podcast():
     if DEBUG == '4':
+        podcastdb.insert_podcast('category', 'test_update_podcast', 'rss_feed', 'title', 'test_update_podcast', 'published', 'description')
+
         request1 = '''
 UPDATE podcasts
    SET category = "category 1",
-       podcast_name = "podcast_name 1",
+       podcast_name = "test_update_podcast 1",
        rss_feed = "rss_feed 1",
        title = "title 1",
-       link = "link 1",
+       link = "test_update_podcast 1",
        published = "published 1",
        description = "description 1",
        downloaded = 1,
        processed = 1
- WHERE ID = 1
+ WHERE podcast_name = "test_update_podcast"
 '''
         request2 = '''
 UPDATE podcasts_not_exists

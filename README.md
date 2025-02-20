@@ -45,3 +45,9 @@ PYTHONPATH=$(pwd) python3 src/main.py
 ```bash
 PYTHONPATH=$(pwd) pytest
 ```
+
+or
+
+```bash
+rm podcast_pytest.db && PYTHONPATH=$(pwd) pytest
+```

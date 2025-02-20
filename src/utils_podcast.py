@@ -15,7 +15,7 @@ class Podcasts():
         self.podcasts = []
     
 
-    def download_podcasts(self):
+    def download_podcasts(self)->bool:
         prefix = f'[{self.__class__.__name__} | download_podcasts]'
 
         try:
@@ -25,9 +25,12 @@ class Podcasts():
             for podcast in self.podcasts:
                 podcast.download_podcast()
                 podcast.update_podcast()
+            
+            return True
 
         except Exception as e:
             self.logs.logging_msg(f"{prefix} Error: {e}", 'WARNING')
+            return False
 
 
     def transcribe_podcasts(self):
