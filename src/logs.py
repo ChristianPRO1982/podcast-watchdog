@@ -21,7 +21,8 @@ class Logs:
             self.log_filename = f"{self.LOGS_PATH}{date_str}.log"
 
         except Exception as e:
-            self.status = f"Error in logging.py Logger.create_file(): {e}"
+            if self.DEBUG != '4':
+                self.status = f"Error in logging.py Logger.create_file(): {e}"
     
 
     def basicConfig(self):

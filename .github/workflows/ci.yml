@@ -38,7 +38,7 @@ jobs:
     - name: Run tests with pytest
       run: |
         source venv/bin/activate
-        DEBUG=4 pytest --maxfail=1 --disable-warnings -q
+        DEBUG=4 pytest --disable-warnings -q
 
     - name: Remove podcast_pytest.db file
       run: |

@@ -36,7 +36,7 @@ class PodcastDB:
                 processed INTEGER DEFAULT 0
             )""")
 
-            self.logs.logging_msg(f"{log_prefix} CREATE TABLE podcasts", 'DEBUG')
+            self.logs.logging_msg(f"{log_prefix} CREATE TABLE `podcasts`", 'DEBUG')
         
         except Exception as e:
             self.status = f"{log_prefix} Error: {e}"
