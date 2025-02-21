@@ -1,3 +1,11 @@
+## [1.2.1](https://github.com/ChristianPRO1982/watch-podcast-download/compare/v1.2.0...v1.2.1) (2025-02-21)
+
+
+### Bug Fixes
+
+* add OpenAI API model: chatgpt-4o-latest ([23d79e0](https://github.com/ChristianPRO1982/watch-podcast-download/commit/23d79e00c4c3a6cc933c79760b5af1627015c9c1))
+* Error in logging.py Logger.logging_msg(): 'list' object has no attribute 'upper' ([664ae3e](https://github.com/ChristianPRO1982/watch-podcast-download/commit/664ae3ed610cf4f0eeae0fc3339c1d3fe3ad213e))
+
 # [1.2.0](https://github.com/ChristianPRO1982/watch-podcast-download/compare/v1.1.0...v1.2.0) (2025-02-20)
 
 
