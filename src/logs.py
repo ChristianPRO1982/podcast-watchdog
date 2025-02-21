@@ -71,7 +71,7 @@ class Logs:
         try:
             logger = logging.getLogger(__name__)
             # print(logging.getLevelName(logger.getEffectiveLevel()))
-
+            
             type = type.upper()
 
             if type == 'INFO':

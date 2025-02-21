@@ -130,7 +130,7 @@ class Podcasts():
                     ##################
                     response = openai.ChatCompletion.create(
                         # model="gpt-4",
-                        model="gpt-4o",
+                        model="chatgpt-4o-latest",
                         messages=[
                             {"role": "system", "content": role},
                             {"role": "user", "content": prompt}
