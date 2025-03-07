@@ -107,6 +107,9 @@ class Podcasts():
         prefix = f'[{self.__class__.__name__} | summarize_podcasts]'
 
         try:
+            if self.DEBUG != '0':
+                raise Exception("DEBUG mode is enabled > use OpenAI API is disabled")
+            
             openai.api_key = self.OPENAI_API_KEY
 
             self.podcasts.clear()
@@ -189,7 +192,6 @@ UPDATE podcasts
        podcast_name = "{self.name}",
        rss_feed = "{self.rss_feed}",
        title = "{self.title}",
-       link = "{self.link}",
        published = "{self.published}",
        description = "{self.description}",
        downloaded = {self.downloaded},
