@@ -159,7 +159,7 @@ class Podcasts():
 
 ######################################################################################################################################################
 class Podcast():
-    def __init__(self, logs, podcastdb, id, category, name, rss_feed, title, link, published, description, downloaded, transcribed, summarized, summary=None):
+    def __init__(self, logs, podcastdb, id, category, name, rss_feed, summarize, title, link, published, description, downloaded, transcribed, summarized, summary=None):
         self.logs = logs
         self.podcastdb = podcastdb
 
@@ -167,6 +167,7 @@ class Podcast():
         self.category = category
         self.name = name
         self.rss_feed = rss_feed
+        self.summarize = summarize
         self.title = title
         self.link = link
         self.published = published
@@ -191,6 +192,7 @@ UPDATE podcasts
    SET category = "{self.category}",
        podcast_name = "{self.name}",
        rss_feed = "{self.rss_feed}",
+       summarize = {self.summarize},
        title = "{self.title}",
        published = "{self.published}",
        description = "{self.description}",
