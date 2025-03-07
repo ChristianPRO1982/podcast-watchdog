@@ -33,14 +33,14 @@ class Logs:
                 print("§§§§§§§§§§§§§§§§§§§§§§")
                 print("Debug mode: ", self.DEBUG)
                 if self.DEBUG == '1':
-                    logging.basicConfig(filename=self.log_filename, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+                    logging.basicConfig(filename=self.log_filename, level=logging.WARNING, format='%(asctime)s - %(levelname)s - %(message)s')
                 elif self.DEBUG == '2':
                     logging.basicConfig(filename=self.log_filename, level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
                 elif self.DEBUG == '3':
                     logging.basicConfig(filename=self.log_filename, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
             
             else:
-                logging.basicConfig(filename=self.log_filename, level=logging.WARNING, format='%(asctime)s - %(levelname)s - %(message)s')
+                logging.basicConfig(filename=self.log_filename, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
         except Exception as e:
             self.status = f"Error in logging.py Logger.basicConfig(): {e}"
