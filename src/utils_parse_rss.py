@@ -47,7 +47,8 @@ class ParseRSS:
                     self.podcastdb,
                     podcast["category"],
                     podcast["name"],
-                    podcast["rss_feed"]
+                    podcast["rss_feed"],
+                    podcast["summarize"]
                 ))
         
         except Exception as e:
@@ -56,13 +57,18 @@ class ParseRSS:
 
 ######################################################################################################################################################
 class ParsePodcast:
-    def __init__(self, logs, podcastdb, category, name, rss_feed):
+    def __init__(self, logs, podcastdb, category, name, rss_feed, summarize_text):
         self.logs = logs
         self.podcastdb = podcastdb
         
         self.category = category
         self.name = name
         self.rss_feed = rss_feed
+        if summarize_text.lower() == 'true':
+            self.summarize = 1
+        else:
+            self.summarize = 0
+
         self.parse_podcast()
 
 
@@ -113,7 +119,7 @@ class ParsePodcast:
                 published = published.replace('"', "''")
                 description = description.replace('"', "''")
 
-                self.podcastdb.insert_podcast(self.category, self.name, self.rss_feed, title, link, published, description)
+                self.podcastdb.insert_podcast(self.category, self.name, self.rss_feed, self.summarize, title, link, published, description)
 
             self.logs.logging_msg(f"{prefix} >> OK <<", 'DEBUG')
 

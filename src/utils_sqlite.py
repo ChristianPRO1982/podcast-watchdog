@@ -28,6 +28,7 @@ class PodcastDB:
                 category TEXT NOT NULL,
                 podcast_name TEXT NOT NULL,
                 rss_feed TEXT NOT NULL,
+                summarize INTEGER DEFAULT 0,
                 title TEXT NOT NULL,
                 link TEXT NOT NULL UNIQUE,
                 published TEXT NOT NULL,
@@ -45,13 +46,13 @@ class PodcastDB:
             self.logs.logging_msg(self.status, 'ERROR')
 
 
-    def insert_podcast(self, category, podcast_name, rss_feed, title, link, published, description):
+    def insert_podcast(self, category, podcast_name, rss_feed, summarize, title, link, published, description):
         prefix = f'[{self.__class__.__name__} | insert_podcast]'
         
         try:
             request = f'''
-INSERT INTO podcasts (category, podcast_name, rss_feed, title, link, published, description)
-     VALUES ("{category}", "{podcast_name}", "{rss_feed}", "{title}", "{link}", "{published}", "{description}")
+INSERT INTO podcasts (category, podcast_name, rss_feed, summarize, title, link, published, description)
+     VALUES ("{category}", "{podcast_name}", "{rss_feed}", "{summarize}", "{title}", "{link}", "{published}", "{description}")
 '''
             self.logs.logging_msg(f"{prefix} request: {request}", 'SQL')
             self.cursor.execute(request)
