@@ -3,6 +3,66 @@ General watch on AI topics through the podcast medium. This project is used to d
 
 Some translations by Deepl.com
 
+[Flowchart](https://github.com/ChristianPRO1982/ai-subject-monitoring-project?tab=readme-ov-file#PW-flowchart)
+
+# System Architecture
+
+## External APIs
+
+* **OpenAI API:** Used for text transcription and summarization.
+
+## Linux Machine Components
+
+* **Crontab:** Automates the execution of the script at scheduled intervals.
+* **Podcast Watchdog (PW):** Core Python scripts that handle the entire workflow.
+    * *main.py:* The main execution script orchestrating all subprocesses.
+    * *utils_parse_rss.py:* Parses RSS feeds and extracts podcast metadata.
+    * *utils_podcast.py:* Handles downloading, transcribing, and summarizing podcasts.
+* **Transcription API:** A FastAPI-based service that processes transcriptions.
+* **Databases:**
+    * *SQLite (podcast.db):* Local storage for podcast metadata.
+    * *MySQL (ai-subject-monitoring):* Centralized database for storing AI-related podcast insights.
+
+## Workflow
+
+1. **Parse RSS Feeds (utils_parse_rss.py - ParseRSS)**
+    * *Extracts podcast episode URLs and metadata.*
+    * *Stores initial data in podcast.db.*
+    * *Uses ai_rss_feeds.json for reference.*
+2. **Download MP3 (utils_podcast.py - Podcasts.download_podcasts)**
+    * *Fetches audio files from podcast sources.*
+    * *Saves MP3 files to the output folder.*
+    * *Updates podcast.db with download status.*
+3. **Transcription (utils_podcast.py - Podcasts.transcribe_podcasts)**
+    * *Calls the transcription API (FastAPI service).*
+    * *Extracts text from MP3 files and saves as .txt.*
+    * *Removes processed MP3 files.*
+    * *Updates podcast.db.*
+4. **Summarization (utils_podcast.py - Podcasts.summarize_podcasts)**
+    * *Calls OpenAI API to generate concise summaries.*
+    * *Uses ai_rss_prompts.json for guidance.*
+    * *Stores summaries in podcast.db.*
+5. **Global Database Update**
+    * *Aggregates processed data.*
+    * *Sends relevant insights to the MySQL database ai-subject-monitoring.*
+
+## Data Storage
+
+* **Input Files:**
+    * *ai_rss_feeds.json: Stores podcast RSS feed information.*
+    * *ai_rss_prompts.json: Stores predefined prompts for AI summarization.*
+* **Output Files:**
+    * *XX_podcast.mp3: Raw downloaded podcast files.*
+    * *XX_podcast.txt: Transcriptions of processed podcasts.*
+
+## Deployment
+
+* The system runs on a **Linux machine**.
+* crontab schedules and automates execution.
+* Requires **Python**, **FastAPI**, **SQLite**, and **MySQL**.
+
+# Files format
+
 ## .ENV format
 
 ```dotenv
@@ -41,21 +101,21 @@ OPENAI_API_KEY='key'
 }
 ```
 
-## launchers
+# launchers
 
-### API
+## API
 
 ```bash
 uvicorn app.main:app --reload --port 9000
 ```
 
-### app
+## app
 
 ```bash
 PYTHONPATH=$(pwd) python3 src/main.py
 ```
 
-### Pytest
+## Pytest
 
 ```bash
 PYTHONPATH=$(pwd) pytest
