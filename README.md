@@ -72,7 +72,7 @@ Some translations by Deepl.com
 
 ```dotenv
 DEBUG=4 # 0: off, 1: on, 2: on with debug messages, 3: on with only SQL queries, 4: for pytest
-LOG_RETENTION_DAYS=30
+LOG_RETENTION_DAYS=40
 LOGS_PATH='./logs/'
 
 RSS_FEEDS='my_file_rss_feeds.json'
@@ -81,6 +81,7 @@ PREFIX='podcast_'
 
 OPENAI_PROMPTS='my_file_rss_prompts.json'
 OPENAI_API_KEY='key'
+SUMMARY_DAYS_LIMIT=63
 ```
 
 ## json file format for podcasts
