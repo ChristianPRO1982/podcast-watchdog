@@ -1,3 +1,19 @@
+# [1.3.0](https://github.com/ChristianPRO1982/podcast-watchdog/compare/v1.2.1...v1.3.0) (2025-03-21)
+
+
+### Bug Fixes
+
+* date for summarize > today - X days ([a6bab39](https://github.com/ChristianPRO1982/podcast-watchdog/commit/a6bab39cbb9e196a6963725c4fbbe40006f8e6b6))
+* OpenAI / pytest ([26f797a](https://github.com/ChristianPRO1982/podcast-watchdog/commit/26f797aaced8a634e12633a5c8b781436040d082))
+* pytest ([8d8ff4e](https://github.com/ChristianPRO1982/podcast-watchdog/commit/8d8ff4ecfa0899ef02a7d393c4170f34ae570ab9))
+* select podcast with summarize ([4324574](https://github.com/ChristianPRO1982/podcast-watchdog/commit/4324574a906a3b66a3776b6e77e2ad331b4e340a))
+* semantics with good GitHub url ([02fb4f2](https://github.com/ChristianPRO1982/podcast-watchdog/commit/02fb4f2baaa3037f5bd526f83ad553efcacca2f8))
+
+
+### Features
+
+* add option of summarize for any podcast ([3e46973](https://github.com/ChristianPRO1982/podcast-watchdog/commit/3e469739abee79cda7047689534c56078a307c6e))
+
 ## [1.2.1](https://github.com/ChristianPRO1982/watch-podcast-download/compare/v1.2.0...v1.2.1) (2025-02-21)
 
 
