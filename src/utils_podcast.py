@@ -3,9 +3,10 @@ import requests
 from bs4 import BeautifulSoup
 import os
 import json
+from datetime import datetime, timedelta
 
 
-######################################################################################################################################################
+
 class Podcasts():
     def __init__(self, logs, podcastdb):
         self.logs = logs
@@ -107,10 +108,14 @@ class Podcasts():
         prefix = f'[{self.__class__.__name__} | summarize_podcasts]'
 
         try:
+            if self.DEBUG != '0':
+                raise Exception("DEBUG mode is enabled > use OpenAI API is disabled")
+            
             openai.api_key = self.OPENAI_API_KEY
 
+            published_int_min = (datetime.now() - timedelta(days=int(os.getenv('SUMMARY_DAYS_LIMIT')))).strftime('%Y%m%d')
             self.podcasts.clear()
-            self.podcasts = self.podcastdb.podcasts(downloaded=True, transcribed=True, summarized=False)
+            self.podcasts = self.podcastdb.podcasts(downloaded=True, transcribed=True, summarized=False, published_int_min=published_int_min)
 
             for podcast in self.podcasts:
                 try:
@@ -130,7 +135,7 @@ class Podcasts():
                     ##################
                     response = openai.ChatCompletion.create(
                         # model="gpt-4",
-                        model="gpt-4o",
+                        model="chatgpt-4o-latest",
                         messages=[
                             {"role": "system", "content": role},
                             {"role": "user", "content": prompt}
@@ -139,6 +144,8 @@ class Podcasts():
                     
                     podcast.summarized = 1
                     podcast.summary = response['choices'][0]['message']['content']
+                    with open(f'./{self.FOLDER_PATH}/{self.PREFIX}{podcast.id}_summary.txt', 'w', encoding='utf-8') as summary_file:
+                        summary_file.write(podcast.summary)
                     self.logs.logging_msg(f"{prefix} Summarization successful for podcast: [{podcast.id}] {podcast.title}", 'DEBUG')
 
                 except Exception as e:
@@ -152,11 +159,32 @@ class Podcasts():
         except Exception as e:
             self.logs.logging_msg(f"{prefix} Error: {e}", 'WARNING')
             return False
+        
+
+    def update_published_int(self):
+        prefix = f'[{self.__class__.__name__} | update_published_int]'
+
+        try:
+            self.logs.logging_msg(f"{prefix} start", 'DEBUG')
+
+            self.podcasts.clear()
+            self.podcasts = self.podcastdb.podcasts()
+
+            for podcast in self.podcasts:
+                podcast.update_podcast_published_int()
+            
+            return True
+
+        except Exception as e:
+            self.logs.logging_msg(f"{prefix} Error: {e}", 'WARNING')
+            return False
 
 
 ######################################################################################################################################################
+
+
 class Podcast():
-    def __init__(self, logs, podcastdb, id, category, name, rss_feed, title, link, published, description, downloaded, transcribed, summarized, summary=None):
+    def __init__(self, logs, podcastdb, id, category, name, rss_feed, summarize, title, link, published, description, downloaded, transcribed, summarized, summary=None):
         self.logs = logs
         self.podcastdb = podcastdb
 
@@ -164,6 +192,7 @@ class Podcast():
         self.category = category
         self.name = name
         self.rss_feed = rss_feed
+        self.summarize = summarize
         self.title = title
         self.link = link
         self.published = published
@@ -183,23 +212,56 @@ class Podcast():
         prefix = f'[{self.__class__.__name__} | update_podcast]'
 
         try:
+            self.logs.logging_msg(f"{prefix} start", 'DEBUG')
+
             request = f'''
 UPDATE podcasts
    SET category = "{self.category}",
        podcast_name = "{self.name}",
        rss_feed = "{self.rss_feed}",
+       summarize = {self.summarize},
        title = "{self.title}",
-       link = "{self.link}",
        published = "{self.published}",
        description = "{self.description}",
        downloaded = {self.downloaded},
        transcribed = {self.transcribed},
        summarized = {self.summarized},
-       summary = "{self.summary}"
+       summary = "{self.magic_quotes(self.summary)}"
  WHERE id = {self.id}
 '''
             self.podcastdb.update_podcast(request)
             self.logs.logging_msg(f"{prefix} podcast updated: [{self.id}] {self.title}", 'DEBUG')
+
+        except Exception as e:
+            self.logs.logging_msg(f"{prefix} Error: {e}", 'WARNING')
+
+
+    def magic_quotes(self, text):
+        prefix = f'[{self.__class__.__name__} | magic_quotes]'
+        try:
+            return text.replace('"', '”')
+        except Exception as e:
+            self.logs.logging_msg(f"{prefix} Error: {e}", 'WARNING')
+            return text
+
+
+    def update_podcast_published_int(self):
+        prefix = f'[{self.__class__.__name__} | update_podcast_published_int]'
+
+        try:
+            self.logs.logging_msg(f"{prefix} start", 'DEBUG')
+
+            date_format = "%a, %d %b %Y %H:%M:%S %Z" if "GMT" in self.published else "%a, %d %b %Y %H:%M:%S %z"
+            published_date = datetime.strptime(self.published, date_format)
+            published_int = int(published_date.strftime("%Y%m%d"))
+
+            request = f'''
+UPDATE podcasts
+   SET published_int = {published_int}
+ WHERE id = {self.id}
+'''
+            self.podcastdb.update_podcast(request)
+            self.logs.logging_msg(f"{prefix} podcast updated: [{self.id}] {self.published} > {published_int}", 'DEBUG')
 
         except Exception as e:
             self.logs.logging_msg(f"{prefix} Error: {e}", 'WARNING')

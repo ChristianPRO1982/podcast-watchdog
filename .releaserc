@@ -1,6 +1,6 @@
 {
   "branches": ["main", "dev"],
-  "repositoryUrl": "https://github.com/ChristianPRO1982/watch-podcast-download",
+  "repositoryUrl": "https://github.com/ChristianPRO1982/podcast-watchdog",
   "plugins": [
     "@semantic-release/commit-analyzer",
     "@semantic-release/release-notes-generator",

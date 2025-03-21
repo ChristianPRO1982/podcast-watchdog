@@ -28,6 +28,9 @@ def main()->bool:
         logs.logging_msg("summarize podcasts")
         podcasts.summarize_podcasts()
 
+        logs.logging_msg("Update published_int")
+        podcasts.update_published_int()
+
         logs.logging_msg("logout from podcastdb")
         podcastdb.logout()
 

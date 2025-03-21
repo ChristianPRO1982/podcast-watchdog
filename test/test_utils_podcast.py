@@ -1,7 +1,9 @@
 import pytest
+import pytz
 import dotenv
-import os
 import shutil
+import os
+from datetime import datetime
 from src.logs import Logs
 from src.utils_sqlite import PodcastDB
 from src.utils_podcast import Podcasts
@@ -22,7 +24,7 @@ podcasts = Podcasts(logs, podcastdb)
 
 def test_podcasts():
     if DEBUG == '4':
-        podcastdb.insert_podcast('category', 'test_podcasts', 'rss_feed', 'title', 'test_podcasts', 'published', 'description')
+        podcastdb.insert_podcast('category', 'test_podcast', 'rss_feed', 0, 'title', 'link_podcast', 'published', 'description')
         count_before = podcastdb.count_podcasts(downloaded=False)
         podcasts.download_podcasts()
         count_after = podcastdb.count_podcasts(downloaded=False)
@@ -34,7 +36,7 @@ def test_podcasts():
 
 def test_transcribe():
     if DEBUG == '4':
-        podcastdb.insert_podcast('category', 'test_transcribe', 'rss_feed', 'title', 'test_transcribe', 'published', 'description')
+        podcastdb.insert_podcast('category', 'test_transcribe', 'rss_feed', 0, 'title', 'link_transcribe', 'published', 'description')
         request = '''
 UPDATE podcasts
    SET downloaded = 1
@@ -45,26 +47,6 @@ UPDATE podcasts
         count_before = podcastdb.count_podcasts(downloaded=True, transcribed=False)
         podcasts.transcribe_podcasts()
         count_after = podcastdb.count_podcasts(downloaded=True, transcribed=False)
-        assert count_before - 1 == count_after
-    
-    else:
-        assert False
-
-
-def test_summarize():
-    if DEBUG == '4':
-        podcastdb.insert_podcast('category', 'test_summarize', 'rss_feed', 'title', 'test_summarize', 'published', 'description')
-        request = '''
-UPDATE podcasts
-   SET downloaded = 1,
-       transcribed = 1
- WHERE podcast_name = "test_summarize"
-'''
-        podcastdb.update_podcast(request)
-
-        count_before = podcastdb.count_podcasts(downloaded=True, transcribed=True, summarized=False)
-        podcasts.summarize_podcasts()
-        count_after = podcastdb.count_podcasts(downloaded=True, transcribed=True, summarized=False)
         assert count_before - 1 == count_after
     
     else:

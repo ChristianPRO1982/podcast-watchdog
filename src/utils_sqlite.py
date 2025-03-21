@@ -28,9 +28,11 @@ class PodcastDB:
                 category TEXT NOT NULL,
                 podcast_name TEXT NOT NULL,
                 rss_feed TEXT NOT NULL,
+                summarize INTEGER DEFAULT 0,
                 title TEXT NOT NULL,
                 link TEXT NOT NULL UNIQUE,
                 published TEXT NOT NULL,
+                published_int INTEGER,
                 description TEXT NOT NULL,
                 downloaded INTEGER DEFAULT 0,
                 transcribed INTEGER DEFAULT 0,
@@ -45,13 +47,13 @@ class PodcastDB:
             self.logs.logging_msg(self.status, 'ERROR')
 
 
-    def insert_podcast(self, category, podcast_name, rss_feed, title, link, published, description):
+    def insert_podcast(self, category, podcast_name, rss_feed, summarize, title, link, published, description):
         prefix = f'[{self.__class__.__name__} | insert_podcast]'
         
         try:
             request = f'''
-INSERT INTO podcasts (category, podcast_name, rss_feed, title, link, published, description)
-     VALUES ("{category}", "{podcast_name}", "{rss_feed}", "{title}", "{link}", "{published}", "{description}")
+INSERT INTO podcasts (category, podcast_name, rss_feed, summarize, title, link, published, description)
+     VALUES ("{category}", "{podcast_name}", "{rss_feed}", "{summarize}", "{title}", "{link}", "{published}", "{description}")
 '''
             self.logs.logging_msg(f"{prefix} request: {request}", 'SQL')
             self.cursor.execute(request)
@@ -66,7 +68,7 @@ INSERT INTO podcasts (category, podcast_name, rss_feed, title, link, published, 
                 self.logs.logging_msg(f"{prefix} Error: {e}", 'WARNING')
     
 
-    def podcasts(self, downloaded: bool = None, transcribed: bool = None, summarized: bool = None)->list:
+    def podcasts(self, downloaded: bool = None, transcribed: bool = None, summarized: bool = None, published_int_min: int = None)->list:
         prefix = f'[{self.__class__.__name__} | podcasts]'
 
         if downloaded is True:  downloaded_txt = '   AND downloaded = 1'
@@ -78,6 +80,8 @@ INSERT INTO podcasts (category, podcast_name, rss_feed, title, link, published, 
         if summarized is True:   summarized_txt = '   AND summarized = 1'
         if summarized is False:  summarized_txt = '   AND summarized = 0'
         if summarized is None:   summarized_txt = ''
+        if published_int_min is not None: published_int_min_txt = '   AND published_int >= ' + str(published_int_min)
+        if published_int_min is None:     published_int_min_txt = ''
 
         try:
             request = f'''
@@ -87,6 +91,7 @@ SELECT *
 {downloaded_txt}
 {transcribed_txt}
 {summarized_txt}
+{published_int_min_txt}
 '''
             self.logs.logging_msg(f"{prefix} request: {request}", 'SQL')
             self.cursor.execute(request)
@@ -107,7 +112,8 @@ SELECT *
                     row[8],
                     row[9],
                     row[10],
-                    row[11]
+                    row[11],
+                    row[12]
                 )
                 podcasts.append(podcast)
             
