@@ -22,7 +22,7 @@ def test_status():
 def test_add_podcast():
     if DEBUG == '4':
         count_before = podcastdb.count_podcasts()
-        podcastdb.insert_podcast('category', 'test_add_podcast', 'rss_feed', 'title', 'test_add_podcast', 'published', 'description')
+        podcastdb.insert_podcast('category', 'test_add_podcast', 'rss_feed', 0, 'title', 'test_add_podcast', 'published', 'description')
         count_after = podcastdb.count_podcasts()
         assert count_before + 1 == count_after
     
@@ -31,7 +31,7 @@ def test_add_podcast():
 
 def test_update_podcast():
     if DEBUG == '4':
-        podcastdb.insert_podcast('category', 'test_update_podcast', 'rss_feed', 'title', 'test_update_podcast', 'published', 'description')
+        podcastdb.insert_podcast('category', 'test_update_podcast', 'rss_feed', 0, 'title', 'test_update_podcast', 'published', 'description')
 
         request1 = '''
 UPDATE podcasts

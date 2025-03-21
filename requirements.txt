@@ -4,4 +4,5 @@ setuptools
 requests
 bs4
 pytest
+pytz
 openai==0.28
