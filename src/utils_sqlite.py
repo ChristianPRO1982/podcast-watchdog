@@ -32,6 +32,7 @@ class PodcastDB:
                 title TEXT NOT NULL,
                 link TEXT NOT NULL UNIQUE,
                 published TEXT NOT NULL,
+                published_int INTEGER,
                 description TEXT NOT NULL,
                 downloaded INTEGER DEFAULT 0,
                 transcribed INTEGER DEFAULT 0,
@@ -67,7 +68,7 @@ INSERT INTO podcasts (category, podcast_name, rss_feed, summarize, title, link, 
                 self.logs.logging_msg(f"{prefix} Error: {e}", 'WARNING')
     
 
-    def podcasts(self, downloaded: bool = None, transcribed: bool = None, summarized: bool = None)->list:
+    def podcasts(self, downloaded: bool = None, transcribed: bool = None, summarized: bool = None, published_int_min: int = None)->list:
         prefix = f'[{self.__class__.__name__} | podcasts]'
 
         if downloaded is True:  downloaded_txt = '   AND downloaded = 1'
@@ -79,6 +80,8 @@ INSERT INTO podcasts (category, podcast_name, rss_feed, summarize, title, link, 
         if summarized is True:   summarized_txt = '   AND summarized = 1'
         if summarized is False:  summarized_txt = '   AND summarized = 0'
         if summarized is None:   summarized_txt = ''
+        if published_int_min is not None: published_int_min_txt = '   AND published_int >= ' + str(published_int_min)
+        if published_int_min is None:     published_int_min_txt = ''
 
         try:
             request = f'''
@@ -88,6 +91,7 @@ SELECT *
 {downloaded_txt}
 {transcribed_txt}
 {summarized_txt}
+{published_int_min_txt}
 '''
             self.logs.logging_msg(f"{prefix} request: {request}", 'SQL')
             self.cursor.execute(request)

@@ -3,9 +3,10 @@ import requests
 from bs4 import BeautifulSoup
 import os
 import json
+from datetime import datetime, timedelta
 
 
-######################################################################################################################################################
+
 class Podcasts():
     def __init__(self, logs, podcastdb):
         self.logs = logs
@@ -112,8 +113,9 @@ class Podcasts():
             
             openai.api_key = self.OPENAI_API_KEY
 
+            published_int_min = (datetime.now() - timedelta(days=int(os.getenv('SUMMARY_DAYS_LIMIT')))).strftime('%Y%m%d')
             self.podcasts.clear()
-            self.podcasts = self.podcastdb.podcasts(downloaded=True, transcribed=True, summarized=False)
+            self.podcasts = self.podcastdb.podcasts(downloaded=True, transcribed=True, summarized=False, published_int_min=published_int_min)
 
             for podcast in self.podcasts:
                 try:
@@ -155,9 +157,30 @@ class Podcasts():
         except Exception as e:
             self.logs.logging_msg(f"{prefix} Error: {e}", 'WARNING')
             return False
+        
+
+    def update_published_int(self):
+        prefix = f'[{self.__class__.__name__} | update_published_int]'
+
+        try:
+            self.logs.logging_msg(f"{prefix} start", 'DEBUG')
+
+            self.podcasts.clear()
+            self.podcasts = self.podcastdb.podcasts()
+
+            for podcast in self.podcasts:
+                podcast.update_podcast_published_int()
+            
+            return True
+
+        except Exception as e:
+            self.logs.logging_msg(f"{prefix} Error: {e}", 'WARNING')
+            return False
 
 
 ######################################################################################################################################################
+
+
 class Podcast():
     def __init__(self, logs, podcastdb, id, category, name, rss_feed, summarize, title, link, published, description, downloaded, transcribed, summarized, summary=None):
         self.logs = logs
@@ -187,6 +210,8 @@ class Podcast():
         prefix = f'[{self.__class__.__name__} | update_podcast]'
 
         try:
+            self.logs.logging_msg(f"{prefix} start", 'DEBUG')
+
             request = f'''
 UPDATE podcasts
    SET category = "{self.category}",
@@ -204,6 +229,28 @@ UPDATE podcasts
 '''
             self.podcastdb.update_podcast(request)
             self.logs.logging_msg(f"{prefix} podcast updated: [{self.id}] {self.title}", 'DEBUG')
+
+        except Exception as e:
+            self.logs.logging_msg(f"{prefix} Error: {e}", 'WARNING')
+
+
+    def update_podcast_published_int(self):
+        prefix = f'[{self.__class__.__name__} | update_podcast_published_int]'
+
+        try:
+            self.logs.logging_msg(f"{prefix} start", 'DEBUG')
+
+            date_format = "%a, %d %b %Y %H:%M:%S %Z" if "GMT" in self.published else "%a, %d %b %Y %H:%M:%S %z"
+            published_date = datetime.strptime(self.published, date_format)
+            published_int = int(published_date.strftime("%Y%m%d"))
+
+            request = f'''
+UPDATE podcasts
+   SET published_int = {published_int}
+ WHERE id = {self.id}
+'''
+            self.podcastdb.update_podcast(request)
+            self.logs.logging_msg(f"{prefix} podcast updated: [{self.id}] {self.published} > {published_int}", 'DEBUG')
 
         except Exception as e:
             self.logs.logging_msg(f"{prefix} Error: {e}", 'WARNING')
