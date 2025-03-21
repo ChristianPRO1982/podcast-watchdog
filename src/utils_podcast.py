@@ -144,6 +144,8 @@ class Podcasts():
                     
                     podcast.summarized = 1
                     podcast.summary = response['choices'][0]['message']['content']
+                    with open(f'./{self.FOLDER_PATH}/{self.PREFIX}{podcast.id}_summary.txt', 'w', encoding='utf-8') as summary_file:
+                        summary_file.write(podcast.summary)
                     self.logs.logging_msg(f"{prefix} Summarization successful for podcast: [{podcast.id}] {podcast.title}", 'DEBUG')
 
                 except Exception as e:
@@ -224,7 +226,7 @@ UPDATE podcasts
        downloaded = {self.downloaded},
        transcribed = {self.transcribed},
        summarized = {self.summarized},
-       summary = "{self.summary}"
+       summary = "{self.magic_quotes(self.summary)}"
  WHERE id = {self.id}
 '''
             self.podcastdb.update_podcast(request)
@@ -232,6 +234,15 @@ UPDATE podcasts
 
         except Exception as e:
             self.logs.logging_msg(f"{prefix} Error: {e}", 'WARNING')
+
+
+    def magic_quotes(self, text):
+        prefix = f'[{self.__class__.__name__} | magic_quotes]'
+        try:
+            return text.replace('"', '”')
+        except Exception as e:
+            self.logs.logging_msg(f"{prefix} Error: {e}", 'WARNING')
+            return text
 
 
     def update_podcast_published_int(self):
