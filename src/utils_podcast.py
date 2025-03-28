@@ -2,6 +2,7 @@ import openai
 import requests
 from bs4 import BeautifulSoup
 import os
+import re
 import json
 from datetime import datetime, timedelta
 
@@ -286,10 +287,13 @@ UPDATE podcasts
                     ]
                 elif self.link.startswith('https://feed.ausha.co') or self.link.startswith('https://podcast.ausha.co'):
                     self.logs.logging_msg(f"{prefix} self.link.startswith('https://feed.ausha.co')", 'DEBUG')
-                    mp3_links = [
-                        a['href'] for a in soup.find_all('a', href=True)
-                        if a['href'].endswith('.mp3')
-                    ]
+                    html_content = soup.prettify()
+                    mp3_links = re.findall(r'"(https://dts\.podtrac\.com/redirect\.mp3/audio\.ausha\.co/.*?\.mp3)"', html_content)
+                    # mp3_links = [
+                    #   # a['href'] for a in soup.find_all('a', href=True)
+                        # if a['href'].startswith('https://dts.podtrac.com/redirect.mp3/audio.ausha.co/') and a['href'].endswith('.mp3')
+                        # if a['href'].endswith('.mp3')
+                    # ]
                 elif self.link.startswith('https://sphinx.acast.com/'):
                     self.logs.logging_msg(f"{prefix} self.link.startswith('https://sphinx.acast.com/')", 'DEBUG')
                     mp3_links = [self.link]
