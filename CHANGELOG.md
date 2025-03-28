@@ -1,3 +1,11 @@
+## [1.3.1](https://github.com/ChristianPRO1982/podcast-watchdog/compare/v1.3.0...v1.3.1) (2025-03-28)
+
+
+### Bug Fixes
+
+* download_podcast: startswith('https://feed.ausha.co') ([77f4bf5](https://github.com/ChristianPRO1982/podcast-watchdog/commit/77f4bf5959c29fd3a0558306cb425b7a19a81774))
+* summarize only podcast with tag summarize ([265349c](https://github.com/ChristianPRO1982/podcast-watchdog/commit/265349cf2b2f1e859ecda3f5c3675bc821b784ba))
+
 # [1.3.0](https://github.com/ChristianPRO1982/podcast-watchdog/compare/v1.2.1...v1.3.0) (2025-03-21)
 
 
