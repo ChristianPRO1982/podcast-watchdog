@@ -231,10 +231,10 @@ UPDATE podcasts
  WHERE id = {self.id}
 '''
             self.podcastdb.update_podcast(request)
-            self.logs.logging_msg(f"{prefix} podcast updated: [{self.id}] {self.title}", 'DEBUG')
+            self.logs.logging_msg(f"{prefix} [{self.id}] podcast updated: [{self.id}] {self.title}", 'DEBUG')
 
         except Exception as e:
-            self.logs.logging_msg(f"{prefix} Error: {e}", 'WARNING')
+            self.logs.logging_msg(f"{prefix} [{self.id}] Error: {e}", 'WARNING')
 
 
     def magic_quotes(self, text):
@@ -242,7 +242,7 @@ UPDATE podcasts
         try:
             return text.replace('"', '”')
         except Exception as e:
-            self.logs.logging_msg(f"{prefix} Error: {e}", 'WARNING')
+            self.logs.logging_msg(f"{prefix} [{self.id}] Error: {e}", 'WARNING')
             return text
 
 
@@ -262,17 +262,17 @@ UPDATE podcasts
  WHERE id = {self.id}
 '''
             self.podcastdb.update_podcast(request)
-            self.logs.logging_msg(f"{prefix} podcast updated: [{self.id}] {self.published} > {published_int}", 'DEBUG')
+            self.logs.logging_msg(f"{prefix} [{self.id}] podcast updated: [{self.id}] {self.published} > {published_int}", 'DEBUG')
 
         except Exception as e:
-            self.logs.logging_msg(f"{prefix} Error: {e}", 'WARNING')
+            self.logs.logging_msg(f"{prefix} [{self.id}] Error: {e}", 'WARNING')
     
 
     def download_podcast(self):
         prefix = f'[{self.__class__.__name__} | download_podcast]'
 
         try:
-            self.logs.logging_msg(f"{prefix} downloading podcast: [{self.id}] {self.title}", 'DEBUG')
+            self.logs.logging_msg(f"{prefix} [{self.id}] downloading podcast: [{self.id}] {self.title}", 'DEBUG')
 
             try:
                 response = requests.get(self.link)
@@ -310,10 +310,10 @@ UPDATE podcasts
             
             except Exception as e:
                 if '404' in str(e):
-                    self.logs.logging_msg(f"{prefix} Podcast link not found: {self.link}", 'WARNING')
+                    self.logs.logging_msg(f"{prefix} [{self.id}] Podcast link not found: {self.link}", 'WARNING')
                     self.downloaded = 404
                 else:
-                    self.logs.logging_msg(f"{prefix} Error parsing podcast link: {e}", 'ERROR')
+                    self.logs.logging_msg(f"{prefix} [{self.id}] Error parsing podcast link: {e}", 'ERROR')
                     self.downloaded = 3
 
             
@@ -324,12 +324,12 @@ UPDATE podcasts
                     response.raise_for_status()
                     with open(file_name, 'wb') as file:
                         file.write(response.content)
-                    self.logs.logging_msg(f"{prefix} Podcast downloaded: {file_name}", 'DEBUG')
+                    self.logs.logging_msg(f"{prefix} [{self.id}] Podcast downloaded: {file_name}", 'DEBUG')
                     self.downloaded = 1
 
                 except Exception as e:
-                    self.logs.logging_msg(f"{prefix} Error downloading podcast: {e}", 'ERROR')
+                    self.logs.logging_msg(f"{prefix} [{self.id}] Error downloading podcast: {e}", 'ERROR')
                     self.downloaded = 2
 
         except Exception as e:
-            self.logs.logging_msg(f"{prefix} Error: {e}", 'WARNING')
+            self.logs.logging_msg(f"{prefix} [{self.id}] Error: {e}", 'WARNING')
