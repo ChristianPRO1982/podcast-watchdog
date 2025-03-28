@@ -73,7 +73,7 @@ class Podcasts():
 
                     if response.status_code == 200:
                         podcast.transcribed = 1
-                        self.logs.logging_msg(f"{prefix} [API status:{response.status_code}] Transcription successful for podcast: [{podcast.id}] {podcast.title}", 'DEBUG')
+                        self.logs.logging_msg(f"{prefix} [API status:{response.status_code}] Transcription successful for podcast: [{podcast.id}] {podcast.title}", 'INFO')
                     else:
                         podcast.transcribed = 2
                         self.logs.logging_msg(f"{prefix} [API status:{response.status_code}] Transcription failed for podcast: [{podcast.id}] {podcast.title} with error: {response_data.get('error', 'Unknown error')}", 'ERROR')
@@ -115,7 +115,7 @@ class Podcasts():
 
             published_int_min = (datetime.now() - timedelta(days=int(os.getenv('SUMMARY_DAYS_LIMIT')))).strftime('%Y%m%d')
             self.podcasts.clear()
-            self.podcasts = self.podcastdb.podcasts(downloaded=True, transcribed=True, summarized=False, published_int_min=published_int_min)
+            self.podcasts = self.podcastdb.podcasts(downloaded=True, transcribed=True, summarized=False, published_int_min=published_int_min, summarize=True)
 
             for podcast in self.podcasts:
                 try:
@@ -146,7 +146,7 @@ class Podcasts():
                     podcast.summary = response['choices'][0]['message']['content']
                     with open(f'./{self.FOLDER_PATH}/{self.PREFIX}{podcast.id}_summary.txt', 'w', encoding='utf-8') as summary_file:
                         summary_file.write(podcast.summary)
-                    self.logs.logging_msg(f"{prefix} Summarization successful for podcast: [{podcast.id}] {podcast.title}", 'DEBUG')
+                    self.logs.logging_msg(f"{prefix} Summarization successful for podcast: [{podcast.id}] {podcast.title}", 'INFO')
 
                 except Exception as e:
                     podcast.summarized = 2
