@@ -1,3 +1,10 @@
+## [1.3.2](https://github.com/ChristianPRO1982/podcast-watchdog/compare/v1.3.1...v1.3.2) (2025-03-28)
+
+
+### Bug Fixes
+
+* id podcast in log ([205b932](https://github.com/ChristianPRO1982/podcast-watchdog/commit/205b932e0b4a1b25ddef5f39b7e55b655b4800a4))
+
 ## [1.3.1](https://github.com/ChristianPRO1982/podcast-watchdog/compare/v1.3.0...v1.3.1) (2025-03-28)
 
 
