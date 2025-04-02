@@ -2,6 +2,7 @@ import openai
 import requests
 from bs4 import BeautifulSoup
 import os
+import re
 import json
 from datetime import datetime, timedelta
 
@@ -41,7 +42,7 @@ class Podcasts():
             self.podcasts = self.podcastdb.podcasts(downloaded=False)
 
             for podcast in self.podcasts:
-                podcast.download_podcast()
+                podcast.download_podcast(text_file_name = os.path.abspath(f'./{self.FOLDER_PATH}/{self.PREFIX}{podcast.id}.txt'))
                 podcast.update_podcast()
             
             return True
@@ -73,7 +74,7 @@ class Podcasts():
 
                     if response.status_code == 200:
                         podcast.transcribed = 1
-                        self.logs.logging_msg(f"{prefix} [API status:{response.status_code}] Transcription successful for podcast: [{podcast.id}] {podcast.title}", 'DEBUG')
+                        self.logs.logging_msg(f"{prefix} [API status:{response.status_code}] Transcription successful for podcast: [{podcast.id}] {podcast.title}", 'INFO')
                     else:
                         podcast.transcribed = 2
                         self.logs.logging_msg(f"{prefix} [API status:{response.status_code}] Transcription failed for podcast: [{podcast.id}] {podcast.title} with error: {response_data.get('error', 'Unknown error')}", 'ERROR')
@@ -115,7 +116,7 @@ class Podcasts():
 
             published_int_min = (datetime.now() - timedelta(days=int(os.getenv('SUMMARY_DAYS_LIMIT')))).strftime('%Y%m%d')
             self.podcasts.clear()
-            self.podcasts = self.podcastdb.podcasts(downloaded=True, transcribed=True, summarized=False, published_int_min=published_int_min)
+            self.podcasts = self.podcastdb.podcasts(downloaded=True, transcribed=True, summarized=False, published_int_min=published_int_min, summarize=True)
 
             for podcast in self.podcasts:
                 try:
@@ -146,7 +147,7 @@ class Podcasts():
                     podcast.summary = response['choices'][0]['message']['content']
                     with open(f'./{self.FOLDER_PATH}/{self.PREFIX}{podcast.id}_summary.txt', 'w', encoding='utf-8') as summary_file:
                         summary_file.write(podcast.summary)
-                    self.logs.logging_msg(f"{prefix} Summarization successful for podcast: [{podcast.id}] {podcast.title}", 'DEBUG')
+                    self.logs.logging_msg(f"{prefix} Summarization successful for podcast: [{podcast.id}] {podcast.title}", 'INFO')
 
                 except Exception as e:
                     podcast.summarized = 2
@@ -230,10 +231,10 @@ UPDATE podcasts
  WHERE id = {self.id}
 '''
             self.podcastdb.update_podcast(request)
-            self.logs.logging_msg(f"{prefix} podcast updated: [{self.id}] {self.title}", 'DEBUG')
+            self.logs.logging_msg(f"{prefix} [{self.id}] podcast updated: [{self.id}] {self.title}", 'DEBUG')
 
         except Exception as e:
-            self.logs.logging_msg(f"{prefix} Error: {e}", 'WARNING')
+            self.logs.logging_msg(f"{prefix} [{self.id}] Error: {e}", 'WARNING')
 
 
     def magic_quotes(self, text):
@@ -241,7 +242,7 @@ UPDATE podcasts
         try:
             return text.replace('"', '”')
         except Exception as e:
-            self.logs.logging_msg(f"{prefix} Error: {e}", 'WARNING')
+            self.logs.logging_msg(f"{prefix} [{self.id}] Error: {e}", 'WARNING')
             return text
 
 
@@ -261,55 +262,87 @@ UPDATE podcasts
  WHERE id = {self.id}
 '''
             self.podcastdb.update_podcast(request)
-            self.logs.logging_msg(f"{prefix} podcast updated: [{self.id}] {self.published} > {published_int}", 'DEBUG')
+            self.logs.logging_msg(f"{prefix} [{self.id}] podcast updated: [{self.id}] {self.published} > {published_int}", 'DEBUG')
 
         except Exception as e:
-            self.logs.logging_msg(f"{prefix} Error: {e}", 'WARNING')
+            self.logs.logging_msg(f"{prefix} [{self.id}] Error: {e}", 'WARNING')
     
 
-    def download_podcast(self):
+    def download_podcast(self, text_file_name):
         prefix = f'[{self.__class__.__name__} | download_podcast]'
 
         try:
-            self.logs.logging_msg(f"{prefix} downloading podcast: [{self.id}] {self.title}", 'DEBUG')
+            self.logs.logging_msg(f"{prefix} [{self.id}] downloading podcast: [{self.id}] {self.title}", 'DEBUG')
 
             try:
                 response = requests.get(self.link)
                 response.raise_for_status()
-                soup = BeautifulSoup(response.content, 'html.parser')
                 
-                if self.link.startswith('https://shows.acast.com'):
-                    self.logs.logging_msg(f"{prefix} self.link.startswith('https://shows.acast.com')", 'DEBUG')
-                    mp3_links = [
-                        a['content'] for a in soup.find_all('meta', content=True)
-                        if a['content'].endswith('.mp3')
-                    ]
-                elif self.link.startswith('https://feed.ausha.co') or self.link.startswith('https://podcast.ausha.co'):
-                    self.logs.logging_msg(f"{prefix} self.link.startswith('https://feed.ausha.co')", 'DEBUG')
-                    mp3_links = [
-                        a['href'] for a in soup.find_all('a', href=True)
-                        if a['href'].endswith('.mp3')
-                    ]
-                elif self.link.startswith('https://sphinx.acast.com/'):
-                    self.logs.logging_msg(f"{prefix} self.link.startswith('https://sphinx.acast.com/')", 'DEBUG')
+                try:
+                    transcribe = None
+                    soup = BeautifulSoup(response.content, 'html.parser')
+                
+                    if self.link.startswith('https://shows.acast.com'):
+                        self.logs.logging_msg(f"{prefix} self.link.startswith('https://shows.acast.com')", 'DEBUG')
+                        mp3_links = [
+                            a['content'] for a in soup.find_all('meta', content=True)
+                            if a['content'].endswith('.mp3')
+                        ]
+                    elif self.link.startswith('https://feed.ausha.co') or self.link.startswith('https://podcast.ausha.co'):
+                        self.logs.logging_msg(f"{prefix} self.link.startswith('https://feed.ausha.co')", 'DEBUG')
+                        html_content = soup.prettify()
+                        mp3_links = [
+                            a['href'] for a in soup.find_all('a', href=True)
+                            if a['href'].endswith('.mp3')
+                        ]
+                        if len(mp3_links) == 0:
+                            mp3_links = re.findall(r'"(https://dts\.podtrac\.com/redirect\.mp3/audio\.ausha\.co/.*?\.mp3)"', html_content)
+                        # mp3_links = [
+                        #   # a['href'] for a in soup.find_all('a', href=True)
+                            # if a['href'].startswith('https://dts.podtrac.com/redirect.mp3/audio.ausha.co/') and a['href'].endswith('.mp3')
+                            # if a['href'].endswith('.mp3')
+                        # ]
+                    elif self.link.startswith('https://sphinx.acast.com/'):
+                        self.logs.logging_msg(f"{prefix} self.link.startswith('https://sphinx.acast.com/')", 'DEBUG')
+                        mp3_links = [self.link]
+                    elif self.link.startswith('https://anchor.fm/'):
+                        self.logs.logging_msg(f"{prefix} self.link.startswith('https://anchor.fm/')", 'DEBUG')
+                        mp3_links = [self.link]
+                    elif self.link.startswith('https://datadriven101.tech/'):
+                        self.logs.logging_msg(f"{prefix} self.link.startswith('https://datadriven101.tech/')", 'DEBUG')
+                        transcribe = soup.find('div', class_='elementor-tab-content elementor-clearfix')
+                    else:
+                        self.logs.logging_msg(f"{prefix} self.link.startswith: else", 'DEBUG')
+                        self.logs.logging_msg(f"{prefix} can't to parse the self.link: {self.link}", 'WARNING')
+                        mp3_links = []
+                
+                except Exception as e:
+                    self.logs.logging_msg(f"{prefix} [{self.id}] Error parsing podcast link: {e}", 'DEBUG')
                     mp3_links = [self.link]
-                elif self.link.startswith('https://anchor.fm/'):
-                    self.logs.logging_msg(f"{prefix} self.link.startswith('https://anchor.fm/')", 'DEBUG')
-                    mp3_links = [self.link]
-                else:
-                    self.logs.logging_msg(f"{prefix} self.link.startswith: else", 'DEBUG')
-                    self.logs.logging_msg(f"{prefix} can't to parse the self.link: {self.link}", 'WARNING')
-                    mp3_links = []
+                finally:
+                    self.logs.logging_msg(f"{prefix} [{self.id}] mp3_links: {mp3_links}", 'DEBUG')
                 
                 self.logs.logging_msg("a", mp3_links)
                 self.link = mp3_links[0]
             
             except Exception as e:
                 if '404' in str(e):
-                    self.logs.logging_msg(f"{prefix} Podcast link not found: {self.link}", 'WARNING')
+                    self.logs.logging_msg(f"{prefix} [{self.id}] Podcast link not found: {self.link}", 'WARNING')
                     self.downloaded = 404
+                elif transcribe:
+                    self.logs.logging_msg(f"{prefix} [{self.id}] Transcription found: {self.link}", 'DEBUG')
+                    self.downloaded = 1
+                    self.transcribed = 1
+                    try:
+                        with open(text_file_name, 'w', encoding='utf-8') as text_file:
+                            text_file.write(transcribe.text)
+                        self.logs.logging_msg(f"{prefix} Transcription saved: {text_file_name}", 'DEBUG')
+
+                    except Exception as e:
+                        self.transcribed = 5
+                        self.logs.logging_msg(f"{prefix} Error during generate txt file: {e}", 'ERROR')
                 else:
-                    self.logs.logging_msg(f"{prefix} Error parsing podcast link: {e}", 'ERROR')
+                    self.logs.logging_msg(f"{prefix} [{self.id}] Error to find podcast link: {e}", 'ERROR')
                     self.downloaded = 3
 
             
@@ -320,12 +353,12 @@ UPDATE podcasts
                     response.raise_for_status()
                     with open(file_name, 'wb') as file:
                         file.write(response.content)
-                    self.logs.logging_msg(f"{prefix} Podcast downloaded: {file_name}", 'DEBUG')
+                    self.logs.logging_msg(f"{prefix} [{self.id}] Podcast downloaded: {file_name}", 'DEBUG')
                     self.downloaded = 1
 
                 except Exception as e:
-                    self.logs.logging_msg(f"{prefix} Error downloading podcast: {e}", 'ERROR')
+                    self.logs.logging_msg(f"{prefix} [{self.id}] Error downloading podcast: {e}", 'ERROR')
                     self.downloaded = 2
 
         except Exception as e:
-            self.logs.logging_msg(f"{prefix} Error: {e}", 'WARNING')
+            self.logs.logging_msg(f"{prefix} [{self.id}] Error: {e}", 'WARNING')

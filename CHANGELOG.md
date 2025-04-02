@@ -1,3 +1,31 @@
+# [1.4.0](https://github.com/ChristianPRO1982/podcast-watchdog/compare/v1.3.2...v1.4.0) (2025-04-02)
+
+
+### Bug Fixes
+
+* direct link in podcast.download_podcast: add a try except for switch between parser or direct link ([250bf9e](https://github.com/ChristianPRO1982/podcast-watchdog/commit/250bf9eb1bd8e172514dbcbbb2f43aac298cc1df))
+* update_published_int() must be before summarize_podcasts() ([c1ec9aa](https://github.com/ChristianPRO1982/podcast-watchdog/commit/c1ec9aaa29d61b9320d4ece7b679099e2b2bc918))
+
+
+### Features
+
+* download datadriven101.tech: the transcribe already exist ([100f330](https://github.com/ChristianPRO1982/podcast-watchdog/commit/100f33045b6a9527329353e9eb0b0064da4f7f08))
+
+## [1.3.2](https://github.com/ChristianPRO1982/podcast-watchdog/compare/v1.3.1...v1.3.2) (2025-03-28)
+
+
+### Bug Fixes
+
+* id podcast in log ([205b932](https://github.com/ChristianPRO1982/podcast-watchdog/commit/205b932e0b4a1b25ddef5f39b7e55b655b4800a4))
+
+## [1.3.1](https://github.com/ChristianPRO1982/podcast-watchdog/compare/v1.3.0...v1.3.1) (2025-03-28)
+
+
+### Bug Fixes
+
+* download_podcast: startswith('https://feed.ausha.co') ([77f4bf5](https://github.com/ChristianPRO1982/podcast-watchdog/commit/77f4bf5959c29fd3a0558306cb425b7a19a81774))
+* summarize only podcast with tag summarize ([265349c](https://github.com/ChristianPRO1982/podcast-watchdog/commit/265349cf2b2f1e859ecda3f5c3675bc821b784ba))
+
 # [1.3.0](https://github.com/ChristianPRO1982/podcast-watchdog/compare/v1.2.1...v1.3.0) (2025-03-21)
 
 

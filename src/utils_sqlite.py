@@ -68,7 +68,14 @@ INSERT INTO podcasts (category, podcast_name, rss_feed, summarize, title, link, 
                 self.logs.logging_msg(f"{prefix} Error: {e}", 'WARNING')
     
 
-    def podcasts(self, downloaded: bool = None, transcribed: bool = None, summarized: bool = None, published_int_min: int = None)->list:
+    def podcasts(
+            self,
+            downloaded: bool = None,
+            transcribed: bool = None,
+            summarized: bool = None,
+            published_int_min: int = None,
+            summarize:bool = None
+            )->list:
         prefix = f'[{self.__class__.__name__} | podcasts]'
 
         if downloaded is True:  downloaded_txt = '   AND downloaded = 1'
@@ -82,12 +89,16 @@ INSERT INTO podcasts (category, podcast_name, rss_feed, summarize, title, link, 
         if summarized is None:   summarized_txt = ''
         if published_int_min is not None: published_int_min_txt = '   AND published_int >= ' + str(published_int_min)
         if published_int_min is None:     published_int_min_txt = ''
+        if summarize is True:   summarize_txt = '   AND summarize = 1'
+        if summarize is False:  summarize_txt = '   AND summarize = 0'
+        if summarize is None:   summarize_txt = ''
 
         try:
             request = f'''
 SELECT *
   FROM podcasts
  WHERE 1 = 1
+{summarize_txt}
 {downloaded_txt}
 {transcribed_txt}
 {summarized_txt}
