@@ -42,7 +42,7 @@ class Podcasts():
             self.podcasts = self.podcastdb.podcasts(downloaded=False)
 
             for podcast in self.podcasts:
-                podcast.download_podcast()
+                podcast.download_podcast(text_file_name = os.path.abspath(f'./{self.FOLDER_PATH}/{self.PREFIX}{podcast.id}.txt'))
                 podcast.update_podcast()
             
             return True
@@ -268,7 +268,7 @@ UPDATE podcasts
             self.logs.logging_msg(f"{prefix} [{self.id}] Error: {e}", 'WARNING')
     
 
-    def download_podcast(self):
+    def download_podcast(self, text_file_name):
         prefix = f'[{self.__class__.__name__} | download_podcast]'
 
         try:
@@ -279,6 +279,7 @@ UPDATE podcasts
                 response.raise_for_status()
                 
                 try:
+                    transcribe = None
                     soup = BeautifulSoup(response.content, 'html.parser')
                 
                     if self.link.startswith('https://shows.acast.com'):
@@ -307,6 +308,9 @@ UPDATE podcasts
                     elif self.link.startswith('https://anchor.fm/'):
                         self.logs.logging_msg(f"{prefix} self.link.startswith('https://anchor.fm/')", 'DEBUG')
                         mp3_links = [self.link]
+                    elif self.link.startswith('https://datadriven101.tech/'):
+                        self.logs.logging_msg(f"{prefix} self.link.startswith('https://datadriven101.tech/')", 'DEBUG')
+                        transcribe = soup.find('div', class_='elementor-tab-content elementor-clearfix')
                     else:
                         self.logs.logging_msg(f"{prefix} self.link.startswith: else", 'DEBUG')
                         self.logs.logging_msg(f"{prefix} can't to parse the self.link: {self.link}", 'WARNING')
@@ -325,6 +329,18 @@ UPDATE podcasts
                 if '404' in str(e):
                     self.logs.logging_msg(f"{prefix} [{self.id}] Podcast link not found: {self.link}", 'WARNING')
                     self.downloaded = 404
+                elif transcribe:
+                    self.logs.logging_msg(f"{prefix} [{self.id}] Transcription found: {self.link}", 'DEBUG')
+                    self.downloaded = 1
+                    self.transcribed = 1
+                    try:
+                        with open(text_file_name, 'w', encoding='utf-8') as text_file:
+                            text_file.write(transcribe.text)
+                        self.logs.logging_msg(f"{prefix} Transcription saved: {text_file_name}", 'DEBUG')
+
+                    except Exception as e:
+                        self.transcribed = 5
+                        self.logs.logging_msg(f"{prefix} Error during generate txt file: {e}", 'ERROR')
                 else:
                     self.logs.logging_msg(f"{prefix} [{self.id}] Error to find podcast link: {e}", 'ERROR')
                     self.downloaded = 3
