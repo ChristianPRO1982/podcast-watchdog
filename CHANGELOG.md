@@ -1,3 +1,16 @@
+# [1.4.0](https://github.com/ChristianPRO1982/podcast-watchdog/compare/v1.3.2...v1.4.0) (2025-04-02)
+
+
+### Bug Fixes
+
+* direct link in podcast.download_podcast: add a try except for switch between parser or direct link ([250bf9e](https://github.com/ChristianPRO1982/podcast-watchdog/commit/250bf9eb1bd8e172514dbcbbb2f43aac298cc1df))
+* update_published_int() must be before summarize_podcasts() ([c1ec9aa](https://github.com/ChristianPRO1982/podcast-watchdog/commit/c1ec9aaa29d61b9320d4ece7b679099e2b2bc918))
+
+
+### Features
+
+* download datadriven101.tech: the transcribe already exist ([100f330](https://github.com/ChristianPRO1982/podcast-watchdog/commit/100f33045b6a9527329353e9eb0b0064da4f7f08))
+
 ## [1.3.2](https://github.com/ChristianPRO1982/podcast-watchdog/compare/v1.3.1...v1.3.2) (2025-03-28)
 
 
