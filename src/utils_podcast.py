@@ -277,33 +277,46 @@ UPDATE podcasts
             try:
                 response = requests.get(self.link)
                 response.raise_for_status()
-                soup = BeautifulSoup(response.content, 'html.parser')
                 
-                if self.link.startswith('https://shows.acast.com'):
-                    self.logs.logging_msg(f"{prefix} self.link.startswith('https://shows.acast.com')", 'DEBUG')
-                    mp3_links = [
-                        a['content'] for a in soup.find_all('meta', content=True)
-                        if a['content'].endswith('.mp3')
-                    ]
-                elif self.link.startswith('https://feed.ausha.co') or self.link.startswith('https://podcast.ausha.co'):
-                    self.logs.logging_msg(f"{prefix} self.link.startswith('https://feed.ausha.co')", 'DEBUG')
-                    html_content = soup.prettify()
-                    mp3_links = re.findall(r'"(https://dts\.podtrac\.com/redirect\.mp3/audio\.ausha\.co/.*?\.mp3)"', html_content)
-                    # mp3_links = [
-                    #   # a['href'] for a in soup.find_all('a', href=True)
-                        # if a['href'].startswith('https://dts.podtrac.com/redirect.mp3/audio.ausha.co/') and a['href'].endswith('.mp3')
-                        # if a['href'].endswith('.mp3')
-                    # ]
-                elif self.link.startswith('https://sphinx.acast.com/'):
-                    self.logs.logging_msg(f"{prefix} self.link.startswith('https://sphinx.acast.com/')", 'DEBUG')
+                try:
+                    soup = BeautifulSoup(response.content, 'html.parser')
+                
+                    if self.link.startswith('https://shows.acast.com'):
+                        self.logs.logging_msg(f"{prefix} self.link.startswith('https://shows.acast.com')", 'DEBUG')
+                        mp3_links = [
+                            a['content'] for a in soup.find_all('meta', content=True)
+                            if a['content'].endswith('.mp3')
+                        ]
+                    elif self.link.startswith('https://feed.ausha.co') or self.link.startswith('https://podcast.ausha.co'):
+                        self.logs.logging_msg(f"{prefix} self.link.startswith('https://feed.ausha.co')", 'DEBUG')
+                        html_content = soup.prettify()
+                        mp3_links = [
+                            a['href'] for a in soup.find_all('a', href=True)
+                            if a['href'].endswith('.mp3')
+                        ]
+                        if len(mp3_links) == 0:
+                            mp3_links = re.findall(r'"(https://dts\.podtrac\.com/redirect\.mp3/audio\.ausha\.co/.*?\.mp3)"', html_content)
+                        # mp3_links = [
+                        #   # a['href'] for a in soup.find_all('a', href=True)
+                            # if a['href'].startswith('https://dts.podtrac.com/redirect.mp3/audio.ausha.co/') and a['href'].endswith('.mp3')
+                            # if a['href'].endswith('.mp3')
+                        # ]
+                    elif self.link.startswith('https://sphinx.acast.com/'):
+                        self.logs.logging_msg(f"{prefix} self.link.startswith('https://sphinx.acast.com/')", 'DEBUG')
+                        mp3_links = [self.link]
+                    elif self.link.startswith('https://anchor.fm/'):
+                        self.logs.logging_msg(f"{prefix} self.link.startswith('https://anchor.fm/')", 'DEBUG')
+                        mp3_links = [self.link]
+                    else:
+                        self.logs.logging_msg(f"{prefix} self.link.startswith: else", 'DEBUG')
+                        self.logs.logging_msg(f"{prefix} can't to parse the self.link: {self.link}", 'WARNING')
+                        mp3_links = []
+                
+                except Exception as e:
+                    self.logs.logging_msg(f"{prefix} [{self.id}] Error parsing podcast link: {e}", 'DEBUG')
                     mp3_links = [self.link]
-                elif self.link.startswith('https://anchor.fm/'):
-                    self.logs.logging_msg(f"{prefix} self.link.startswith('https://anchor.fm/')", 'DEBUG')
-                    mp3_links = [self.link]
-                else:
-                    self.logs.logging_msg(f"{prefix} self.link.startswith: else", 'DEBUG')
-                    self.logs.logging_msg(f"{prefix} can't to parse the self.link: {self.link}", 'WARNING')
-                    mp3_links = []
+                finally:
+                    self.logs.logging_msg(f"{prefix} [{self.id}] mp3_links: {mp3_links}", 'DEBUG')
                 
                 self.logs.logging_msg("a", mp3_links)
                 self.link = mp3_links[0]
@@ -313,7 +326,7 @@ UPDATE podcasts
                     self.logs.logging_msg(f"{prefix} [{self.id}] Podcast link not found: {self.link}", 'WARNING')
                     self.downloaded = 404
                 else:
-                    self.logs.logging_msg(f"{prefix} [{self.id}] Error parsing podcast link: {e}", 'ERROR')
+                    self.logs.logging_msg(f"{prefix} [{self.id}] Error to find podcast link: {e}", 'ERROR')
                     self.downloaded = 3
 
             
